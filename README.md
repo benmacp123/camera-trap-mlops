@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-Status: planning; nothing is built yet.
+Status: project scaffold in place; no pipeline stage is built yet.
 
 ## The question
 
@@ -73,6 +73,20 @@ released under the
 Images are fetched from LILA's public mirrors and are not stored in this
 repository.
 
+## Reproducing
+
+Needs [uv](https://docs.astral.sh/uv/) and nothing else: no accounts or
+API keys. Python 3.14 on Linux x86-64 or Apple-silicon macOS.
+
+```bash
+make install          # core and dev tools: gate, drift, tracking, tests
+make install-models   # adds CPU torch, BioCLIP 2, DINOv2 and SpeciesNet
+source venv/bin/activate
+make test lint format-check
+```
+
+`make help` lists every target.
+
 ## Licence
 
-To be added.
+Code: [MIT](LICENSE). Data keep their own licences (see Data).
