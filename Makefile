@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -23,6 +23,12 @@ lock: ## Re-resolve uv.lock after editing pyproject.toml
 
 manifest: ## Rebuild data/manifest/ from LILA's Orinoquía metadata and MDv5a results (5 MB download)
 	PYTHONPATH=src python -m cameratrap.data.manifest
+
+subset: ## Rewrite the spike's image selection from the committed manifest
+	PYTHONPATH=src python -m cameratrap.data.subset
+
+fetch: ## Download the spike's images (about 15k, 11 GB) to data/images/ and record checksums
+	PYTHONPATH=src python -m cameratrap.data.fetch
 
 test: ## Run the tests with coverage
 	PYTHONPATH=src python -m pytest -vv --cov=cameratrap --cov=cloud tests/

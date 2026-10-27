@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-Status: scaffold and manifest built (site splits frozen); the image fetch script and first spike are next.
+Status: scaffold, manifest and image fetch built (site splits frozen); the first spike is next.
 
 ## The question
 
@@ -91,6 +91,16 @@ sites form five grouped folds of about 1,530 sequences each. The draw
 uses label counts only, never model scores, and its hash is checked by
 the tests so the hold-out cannot move after the freeze.
 
+The first spike uses a smaller selection,
+[`data/manifest/orinoquia_spike.csv`](data/manifest/orinoquia_spike.csv),
+drawn from the fold sites only, so no hold-out image is downloaded before
+the freeze. It holds up to 100 sequences per class per site, keeping in
+each the three frames with the most confident MegaDetector animal box
+(14,806 images), plus 500 random fold images of any confidence for
+checking the precomputed detections against a fresh run. `make fetch`
+downloads them (about 11 GB) and writes each image's SHA-256 into the
+manifest, so a later download can be checked against it.
+
 ## Reproducing
 
 Needs [uv](https://docs.astral.sh/uv/) and nothing else: no accounts or
@@ -102,6 +112,7 @@ make install-models   # adds CPU torch, BioCLIP 2, DINOv2 and SpeciesNet
 source venv/bin/activate
 make test lint format-check
 make manifest         # optional: rebuild the manifest from LILA (5 MB download)
+make fetch            # optional: download the spike's images (11 GB) and check them
 ```
 
 `make help` lists every target.
