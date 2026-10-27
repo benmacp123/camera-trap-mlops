@@ -77,5 +77,10 @@
     "min_sites_per_class": 2,
     "min_sequences_per_class": 15
   },
-  "splits_sha256": "f727241c14c456dbf5131d352acf65676abc706c86aeecf6a29aefae1392f942"
+  "splits_sha256": "f727241c14c456dbf5131d352acf65676abc706c86aeecf6a29aefae1392f942",
+  "images_fetched": {
+    "base_url": "https://storage.googleapis.com/public-datasets-lila/orinoquia-camera-traps/public/",
+    "first_recorded": "2026-10-27",
+    "checksums_recorded": 15165
+  }
 }
