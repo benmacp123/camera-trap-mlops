@@ -1,0 +1,81 @@
+{
+  "dataset": "orinoquia",
+  "licence": "CDLA-Permissive 1.0",
+  "attribution": "Orinoquia Camera Traps, University of Minnesota, via LILA BC (https://lila.science/datasets/orinoquia-camera-traps/)",
+  "image_base_url": "https://storage.googleapis.com/public-datasets-lila/orinoquia-camera-traps/public/",
+  "archives": {
+    "metadata": {
+      "url": "https://storage.googleapis.com/public-datasets-lila/orinoquia-camera-traps/orinoquia_camera_traps_metadata.zip",
+      "sha256": "86ed898eb373e01336ad9df989bf486f28ae89f034ef1db410aed9d701612238"
+    },
+    "detections": {
+      "url": "https://lila.science/public/lila-md-results/orinoquia-camera-traps_public_mdv5a.0.0_results.json.zip",
+      "sha256": "d2c7d64276b4b8bf1d79339fd7ce16249f54c726341a43a41a7f3f40ad4128b6"
+    }
+  },
+  "classes": [
+    "collared_peccary",
+    "black_agouti",
+    "spotted_paca",
+    "south_american_coati",
+    "white-lipped_peccary",
+    "southern_tamandua",
+    "spixs_guan",
+    "salvins_curassow",
+    "lowland_tapir"
+  ],
+  "timestamp_bounds": [
+    "2020-01-01T00:00:00+00:00",
+    "2021-01-01T00:00:00+00:00"
+  ],
+  "images": 65042,
+  "sequences": 9451,
+  "sites": 49,
+  "sequences_excluded": {
+    "contains human": 360,
+    "multi-species": 139,
+    "no animal label": 2356,
+    "other class": 6096
+  },
+  "images_dropped": {},
+  "sequences_per_class": {
+    "black_agouti": 3173,
+    "collared_peccary": 3205,
+    "lowland_tapir": 228,
+    "salvins_curassow": 254,
+    "south_american_coati": 494,
+    "southern_tamandua": 312,
+    "spixs_guan": 311,
+    "spotted_paca": 1139,
+    "white-lipped_peccary": 335
+  },
+  "sequences_per_split": {
+    "fold0": 1540,
+    "fold1": 1529,
+    "fold2": 1524,
+    "fold3": 1523,
+    "fold4": 1525,
+    "holdout": 1810
+  },
+  "holdout_sites": [
+    "A02",
+    "A03",
+    "A07",
+    "N00",
+    "N13",
+    "N14",
+    "N19",
+    "N23",
+    "N31",
+    "N33"
+  ],
+  "split_settings": {
+    "n_holdout": 10,
+    "n_folds": 5,
+    "seed": 20261027,
+    "min_site_sequences": 30,
+    "min_sites_per_class": 2,
+    "min_sequences_per_class": 15
+  },
+  "splits_sha256": "f727241c14c456dbf5131d352acf65676abc706c86aeecf6a29aefae1392f942"
+}

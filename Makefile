@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock test lint format format-check
+.PHONY: help install install-models lock manifest test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -21,6 +21,8 @@ install-models: ## Also install the model stack (CPU torch, BioCLIP 2, DINOv2, S
 lock: ## Re-resolve uv.lock after editing pyproject.toml
 	uv lock
 
+manifest: ## Rebuild data/manifest/ from LILA's Orinoquía metadata and MDv5a results (5 MB download)
+	PYTHONPATH=src python -m cameratrap.data.manifest
 
 test: ## Run the tests with coverage
 	PYTHONPATH=src python -m pytest -vv --cov=cameratrap --cov=cloud tests/
