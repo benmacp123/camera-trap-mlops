@@ -135,6 +135,22 @@ def best_animal_confidence(detections):
     }
 
 
+def load_detections(raw_dir=RAW_DIR):
+    """Load the precomputed MDv5a detections for every image, by path.
+
+    Args:
+        raw_dir: Directory holding the downloaded archives.
+
+    Returns:
+        Mapping of manifest path to its list of detections, each
+        ``{"category", "conf", "bbox"}`` with a normalised ``[x, y, w, h]``
+        box.
+    """
+    url = orinoquia.ARCHIVES["detections"][0]
+    results = orinoquia.read_zipped_json(raw_dir / url.rsplit("/", 1)[-1])
+    return {row["file"]: row.get("detections") or [] for row in results["images"]}
+
+
 def in_bounds(timestamp, bounds):
     """Return whether an ISO timestamp falls inside a half-open window.
 

@@ -49,6 +49,67 @@ CLASSES = (
     "lowland_tapir",
 )
 
+# Class -> (scientific name, common name, SpeciesNet v4.0.3a model label).
+# Names from the SpeciesNet taxonomy release 2026-06-09; every class is a
+# species-level model label and allowed in COL by its geofence.
+TAXA = {
+    "collared_peccary": (
+        "Pecari tajacu",
+        "collared peccary",
+        "5acf63fb-339d-42b1-af7e-95f6151ae5fb;mammalia;artiodactyla;tayassuidae;"
+        "pecari;tajacu;collared peccary",
+    ),
+    "black_agouti": (
+        "Dasyprocta fuliginosa",
+        "black agouti",
+        "d62cd43d-a519-4cd5-aef2-b76ae4bd16c1;mammalia;rodentia;dasyproctidae;"
+        "dasyprocta;fuliginosa;black agouti",
+    ),
+    "spotted_paca": (
+        "Cuniculus paca",
+        "spotted paca",
+        "32c0147f-1967-4644-b107-8133ae1f020a;mammalia;rodentia;cuniculidae;"
+        "cuniculus;paca;spotted paca",
+    ),
+    "south_american_coati": (
+        "Nasua nasua",
+        "South American coati",
+        "1d3bbcaa-f81a-41d9-8904-5cc8a505af32;mammalia;carnivora;procyonidae;"
+        "nasua;nasua;south american coati",
+    ),
+    "white-lipped_peccary": (
+        "Tayassu pecari",
+        "white-lipped peccary",
+        "575008c3-8e3b-4efe-8da6-47631d60d5b7;mammalia;artiodactyla;tayassuidae;"
+        "tayassu;pecari;white-lipped peccary",
+    ),
+    "southern_tamandua": (
+        "Tamandua tetradactyla",
+        "southern tamandua",
+        "89d41ec3-af8a-438a-86dd-4a6cb1819f07;mammalia;pilosa;myrmecophagidae;"
+        "tamandua;tetradactyla;southern tamandua",
+    ),
+    "spixs_guan": (
+        "Penelope jacquacu",
+        "Spix's guan",
+        "6071f8bb-793d-45f5-9013-8668014e86e3;aves;galliformes;cracidae;"
+        "penelope;jacquacu;spix's guan",
+    ),
+    "salvins_curassow": (
+        "Mitu salvini",
+        "Salvin's curassow",
+        "d9880c5a-b487-4ef0-8e26-39b2b40a06b7;aves;galliformes;cracidae;"
+        "mitu;salvini;salvin's curassow",
+    ),
+    "lowland_tapir": (
+        "Tapirus terrestris",
+        "lowland tapir",
+        "39e5ea73-38f1-454a-8054-7c67f20fbced;mammalia;perissodactyla;tapiridae;"
+        "tapirus;terrestris;lowland tapir",
+    ),
+}
+COUNTRY = "COL"
+
 # Labels that say nothing about which animal is present. A sequence whose
 # other frames carry these keeps its species label.
 NON_ANIMAL = frozenset({"empty", "unknown"})
