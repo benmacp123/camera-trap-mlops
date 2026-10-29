@@ -1,0 +1,95 @@
+{
+  "settings": {
+    "min_site_sequences": 20,
+    "detection_threshold": 0.2,
+    "power_difference": 0.05,
+    "power_alpha": 0.05,
+    "power": 0.8,
+    "bootstrap_resamples": 2000,
+    "seed": 20261028
+  },
+  "criteria": {
+    "detector_agreement": 0.98,
+    "min_classes": 8,
+    "min_sequences_per_class": 100,
+    "weak_site_threshold": 0.85,
+    "min_weak_site_share": 0.25
+  },
+  "frames": 14806,
+  "sequences": 5337,
+  "sites_scored": 38,
+  "sequences_per_class": {
+    "black_agouti": 1714,
+    "collared_peccary": 1495,
+    "lowland_tapir": 200,
+    "salvins_curassow": 205,
+    "south_american_coati": 406,
+    "southern_tamandua": 238,
+    "spixs_guan": 213,
+    "spotted_paca": 573,
+    "white-lipped_peccary": 292
+  },
+  "detector_check": {
+    "n": 500,
+    "agreement": 1.0,
+    "only_precomputed": 0,
+    "only_fresh": 0
+  },
+  "mean_site_balanced_accuracy": {
+    "bioclip": 0.8383015071320975,
+    "speciesnet": 0.9182777038657184,
+    "probe": 0.8866422331480491
+  },
+  "pooled_balanced_accuracy": {
+    "bioclip": 0.8514964006584642,
+    "speciesnet": 0.9193730295120631,
+    "probe": 0.8928116359723912
+  },
+  "speciesnet_open": {
+    "coverage": 0.8875772906127037,
+    "accuracy_on_covered": 0.8940257546970657
+  },
+  "best_zero_shot": "speciesnet",
+  "probe_c_per_fold": {
+    "fold0": 3.1622776601683795,
+    "fold1": 3.1622776601683795,
+    "fold2": 31.622776601683793,
+    "fold3": 10.0,
+    "fold4": 10.0
+  },
+  "power": {
+    "bioclip": {
+      "mean_difference": 0.048340726015951456,
+      "sd_difference": 0.05231307527338222,
+      "sites_needed": 9
+    },
+    "speciesnet": {
+      "mean_difference": -0.03163547071766914,
+      "sd_difference": 0.05646043063013171,
+      "sites_needed": 11
+    }
+  },
+  "msp_accuracy_spearman": {
+    "bioclip": {
+      "rho": 0.8680380785643944,
+      "low": 0.7333914355891661,
+      "high": 0.9262842659522874,
+      "n": 38
+    },
+    "probe": {
+      "rho": 0.836725765570449,
+      "low": 0.6691206682969968,
+      "high": 0.9165425027295805,
+      "n": 38
+    }
+  },
+  "decision": {
+    "use_precomputed_detections": true,
+    "classes_with_enough_sequences": 9,
+    "weak_site_share": 0.07894736842105263,
+    "sites_needed": 11,
+    "dataset_sites": 49,
+    "orinoquia_is_gate_dataset": false
+  },
+  "frames_without_speciesnet": 0
+}

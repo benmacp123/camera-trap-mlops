@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-Status: scaffold, manifest and image fetch built (site splits frozen); the first spike is next.
+Status: Phase 0 done. The first spike ran on Orinoquía's fold sites; the hold-out is untouched.
 
 ## The question
 
@@ -17,6 +17,30 @@ signal warns that accuracy has dropped. This project builds that
 layer. Finding that the off-the-shelf model should stay in place
 everywhere would still be a complete result.
 
+## Answer so far
+
+From the first spike, on 38 fold sites (5,337 sequences, nine species;
+none of the ten hold-out sites has been scored):
+
+- BioCLIP 2 zero-shot, the champion, averages 0.84 balanced accuracy
+  per site and falls below 0.85 at 18 of 38 sites; its weakest species
+  is collared peccary.
+- A linear probe on its frozen embeddings averages 0.89, +4.8 points.
+- SpeciesNet averages 0.92 restricted to the nine species, and answers
+  89% of sequences in its own open-set mode, 89% of them correctly. It
+  has probably seen these images (they went through Wildlife Insights),
+  so this is not held-out performance.
+- Mean model confidence tracks per-site accuracy closely (Spearman 0.87,
+  95% interval 0.73 to 0.93), a first hint that a label-free signal can
+  flag weak sites.
+
+The plan's rule for choosing the dataset asked for at least a quarter of
+sites below 0.85 with the best zero-shot model. Read against SpeciesNet
+that fails (3 of 38 sites); read against BioCLIP 2 it passes. The
+project uses the BioCLIP 2 reading because SpeciesNet's scores here are
+not held-out, a choice made after seeing the results and recorded as
+such.
+
 ## How it works
 
 The components are below. Solid parts are built; dashed parts are
@@ -26,20 +50,22 @@ planned, and the diagram is updated as each one lands.
 flowchart TB
     lila[("LILA BC images<br>Orinoquía, 9 species")] --> manifest["Manifest and loader<br>site split, humans excluded"]
     mdv5a[("Precomputed<br>MegaDetector v5a boxes")] --> manifest
-    mdv5a -.-> crops["Crops"]
-    manifest -.-> crops
-    crops -.-> embeddings[("Cached embeddings<br>Hugging Face Hub")]
+    mdv5a --> crops["Crops"]
+    manifest --> crops
+    crops --> embeddings[("Cached embeddings<br>local; Hugging Face Hub planned")]
 
-    subgraph arms ["Classifier arms (planned)"]
+    subgraph arms ["Classifier arms"]
         direction LR
         speciesnet["SpeciesNet<br>zero-shot, COL geofence"]
         bioclip["BioCLIP 2<br>zero-shot"]
-        probe["Probe and kNN on<br>BioCLIP 2, DINOv2 embeddings"]
-        cnn["Naive CNN fine-tune<br>(control)"]
+        probe["Probe on BioCLIP 2<br>(kNN, DINOv2 planned)"]
+        cnn["Naive CNN fine-tune<br>(control, planned)"]
     end
 
-    crops -.-> arms
-    embeddings -.-> arms
+    crops --> speciesnet
+    embeddings --> bioclip
+    embeddings --> probe
+    crops -.-> cnn
 
     subgraph lifecycle ["Lifecycle (planned)"]
         mlflow[("MLflow registry<br>@champion, @challenger")]
@@ -113,7 +139,13 @@ source venv/bin/activate
 make test lint format-check
 make manifest         # optional: rebuild the manifest from LILA (5 MB download)
 make fetch            # optional: download the spike's images (11 GB) and check them
+make spike-models     # optional: MDv5a check, BioCLIP 2, SpeciesNet (about 12 h on CPU)
+make spike            # score the spike from those caches; writes results/spike/
 ```
+
+The spike's model outputs are cached locally for now; publishing the
+embeddings to the Hugging Face Hub, so the scoring can be reproduced
+without the images or a model run, is part of Phase 2.
 
 `make help` lists every target.
 
