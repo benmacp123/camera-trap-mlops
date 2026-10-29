@@ -43,8 +43,13 @@ spike: ## Score the spike from the caches; writes results/spike/
 test: ## Run the tests with coverage
 	PYTHONPATH=src python -m pytest -vv --cov=cameratrap --cov=cloud tests/
 
+# CI installs only core and dev, so pylint cannot import the model stack
+# that embed and arms use; the same libraries tests/test_layout.py confines.
+MODEL_LIBRARIES = torch,torchvision,open_clip,timm,speciesnet
+
 lint: ## Pylint the packages; docstrings everywhere, tests included
-	PYTHONPATH=src python -m pylint --disable=R,C src/cameratrap src/cloud
+	PYTHONPATH=src python -m pylint --disable=R,C --ignored-modules=$(MODEL_LIBRARIES) \
+		src/cameratrap src/cloud
 	# Every module, class and function needs a docstring, tests included.
 	PYTHONPATH=src python -m pylint --disable=all \
 		--enable=missing-module-docstring,missing-class-docstring,missing-function-docstring \
