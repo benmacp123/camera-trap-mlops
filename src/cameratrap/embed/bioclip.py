@@ -23,7 +23,7 @@ import polars as pl
 import torch
 
 from cameratrap.data import fetch, manifest, orinoquia, subset
-from cameratrap.embed.crops import crop, top_animal
+from cameratrap.data.crops import crop, top_animal
 
 MODEL_ID = "hf-hub:imageomics/bioclip-2"
 CACHE_DIR = Path("data/cache/bioclip2")

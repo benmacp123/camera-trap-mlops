@@ -1,0 +1,17 @@
+{
+  "settings": {
+    "frames_per_sequence": 3,
+    "min_conf": 0.2,
+    "person_conf": 0.2,
+    "pad": 0.1,
+    "max_side": 448,
+    "jpeg": {
+      "quality": 95,
+      "subsampling": 0
+    }
+  },
+  "crops": 25947,
+  "sequences": 9389,
+  "sequences_without_crop": 62,
+  "frames_excluded_person": 51
+}

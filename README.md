@@ -41,6 +41,13 @@ project uses the BioCLIP 2 reading because SpeciesNet's scores here are
 not held-out, a choice made after seeing the results and recorded as
 such.
 
+Upstream, MegaDetector finds no animal at confidence 0.2 in 58 of 9,451
+sequences (0.6%), which therefore reach no classifier. The misses
+concentrate in lowland tapir (3.5% of its sequences) and spotted paca
+(2.6%); the worst site, N02, loses 5.1%. A further 51 frames where the
+detector also sees a person are dropped, costing 4 sequences their only
+crops. Per-site and per-class tables are in `results/detector/`.
+
 ## How it works
 
 The components are below. Solid parts are built; dashed parts are
@@ -50,8 +57,9 @@ planned, and the diagram is updated as each one lands.
 flowchart TB
     lila[("LILA BC images<br>Orinoquía, 9 species")] --> manifest["Manifest and loader<br>site split, humans excluded"]
     mdv5a[("Precomputed<br>MegaDetector v5a boxes")] --> manifest
-    mdv5a --> crops["Crops"]
+    mdv5a --> crops["Crop store<br>top 3 frames a sequence,<br>person frames dropped"]
     manifest --> crops
+    crops --> misses["Detector-miss report<br>per site and class"]
     crops --> embeddings[("Cached embeddings<br>local; Hugging Face Hub planned")]
 
     subgraph arms ["Classifier arms"]
@@ -141,6 +149,9 @@ make manifest         # optional: rebuild the manifest from LILA (5 MB download)
 make fetch            # optional: download the spike's images (11 GB) and check them
 make spike-models     # optional: MDv5a check, BioCLIP 2, SpeciesNet (about 12 h on CPU)
 make spike            # score the spike from those caches; writes results/spike/
+make detector-report  # detector misses per site and class; committed files only
+make fetch-crops      # optional: download every indexed image (20 GB) and check them
+make crops            # cut the 25,947 crops to data/crops/
 ```
 
 The spike's model outputs are cached locally for now; publishing the

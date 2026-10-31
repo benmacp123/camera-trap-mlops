@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops detector-report test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -39,6 +39,20 @@ spike-models: ## Run MDv5a check, BioCLIP 2 embeddings and SpeciesNet over the s
 
 spike: ## Score the spike from the caches; writes results/spike/
 	PYTHONPATH=src python -m cameratrap.report.spike
+
+# Phase 1. The index and the report need only committed files (the index
+# also reads data/raw/ from `make manifest`); crops need the images.
+crop-index: ## Rewrite the crop index: top 3 animal frames of every sequence, person frames dropped
+	PYTHONPATH=src python -m cameratrap.data.crops index
+
+fetch-crops: ## Download the indexed images (about 26k, 20 GB) and record checksums
+	PYTHONPATH=src python -m cameratrap.data.fetch --selection data/manifest/orinoquia_crops.csv
+
+crops: ## Cut the indexed crops to data/crops/ (resumes; needs fetch-crops)
+	PYTHONPATH=src python -m cameratrap.data.crops write
+
+detector-report: ## Detector misses per site and class; writes results/detector/
+	PYTHONPATH=src python -m cameratrap.report.detector
 
 test: ## Run the tests with coverage
 	PYTHONPATH=src python -m pytest -vv --cov=cameratrap --cov=cloud tests/

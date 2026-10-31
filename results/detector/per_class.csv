@@ -1,0 +1,10 @@
+label,sequences,sequences_missed,sequences_lost_to_person,frames_labelled,frames_missed,frames_excluded_person,crops,sequence_miss_rate,frame_miss_rate
+black_agouti,3173,14,4,14074,166,38,8432,0.0044,0.0118
+collared_peccary,3205,4,0,24434,191,2,9105,0.0012,0.0078
+lowland_tapir,228,8,0,1501,86,1,612,0.0351,0.0573
+salvins_curassow,254,0,0,1495,4,0,725,0.0000,0.0027
+south_american_coati,494,1,0,2868,44,7,1390,0.0020,0.0153
+southern_tamandua,312,1,0,1387,27,0,891,0.0032,0.0195
+spixs_guan,311,1,0,1292,16,2,831,0.0032,0.0124
+spotted_paca,1139,29,0,5558,174,0,2997,0.0255,0.0313
+white-lipped_peccary,335,0,0,3357,8,1,964,0.0000,0.0024

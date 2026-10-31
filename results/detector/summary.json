@@ -1,0 +1,16 @@
+{
+  "min_conf": 0.2,
+  "sequences": 9451,
+  "sequences_missed": 58,
+  "sequences_lost_to_person": 4,
+  "sequences_with_crop": 9389,
+  "crops": 25947,
+  "frames_labelled": 55966,
+  "frames_missed": 716,
+  "frames_excluded_person": 51,
+  "sites": 49,
+  "sites_with_a_miss": 16,
+  "site_sequence_miss_rate_mean": 0.0055,
+  "site_sequence_miss_rate_max": 0.051,
+  "worst_site": "N02"
+}
