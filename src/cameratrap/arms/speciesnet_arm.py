@@ -17,9 +17,12 @@ Two readings of each image, as the plan requires:
 SpeciesNet has probably seen Orinoquía during training (its images went
 through Wildlife Insights), so these scores are never held-out performance.
 
-Run as a script to classify the spike selection (about 11 hours on CPU)::
+Run as a script to classify the spike selection (about 11 hours on CPU),
+or every frame in the Phase 1 crop index (resuming from the spike's
+answers, so about 8.5 hours more)::
 
     PYTHONPATH=src python -m cameratrap.arms.speciesnet_arm
+    PYTHONPATH=src python -m cameratrap.arms.speciesnet_arm --crop-index
 """
 
 import argparse
@@ -31,10 +34,13 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 
-from cameratrap.data import fetch, manifest, orinoquia, subset
+from cameratrap.data import crops, fetch, manifest, orinoquia, subset
 
 MODEL = "kaggle:google/speciesnet/pyTorch/v4.0.3a/1"
 CACHE_DIR = Path("data/cache/speciesnet")
+# Phase 2's run over the crop index keeps its own cache so the spike's
+# stays as it was scored.
+CROP_CACHE_DIR = Path("data/cache/speciesnet_crops")
 DETECTOR_CHECK_DIR = Path("data/cache/mdv5a_check")
 OTHER_SPECIES = "other_species"
 
@@ -259,6 +265,38 @@ def read_detections(predictions_json, image_dir):
     }
 
 
+def seed_from_spike(paths, image_dir, out_dir, spike_dir=CACHE_DIR):
+    """Start a new cache from the spike's finished predictions for ``paths``.
+
+    SpeciesNet skips images already in its output file, so seeding it with
+    the spike's answers means only the frames it never scored are run.
+    Images classified with the same model, detections and geofence give
+    the same answer, so reuse changes no result. SpeciesNet refuses to
+    resume from an output holding images outside its input list, so the
+    spike's other frames are left out.
+
+    Args:
+        paths: Manifest paths of the images the new run will classify.
+        image_dir: Local root the manifest paths are stored under.
+        out_dir: The new cache directory.
+        spike_dir: The spike's cache directory.
+
+    Returns:
+        The number of predictions carried over (0 if the new cache already
+        exists or the spike's is missing).
+    """
+    target = out_dir / "predictions.json"
+    source = spike_dir / "predictions.json"
+    if target.exists() or not source.exists():
+        return 0
+    wanted = {str((image_dir / p).resolve()) for p in paths}
+    spike = json.loads(source.read_text())
+    kept = [p for p in spike["predictions"] if p["filepath"] in wanted]
+    out_dir.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps({**spike, "predictions": kept}))
+    return len(kept)
+
+
 def main(argv=None):
     """Run SpeciesNet over the spike's classify images, resuming if stopped.
 
@@ -271,7 +309,12 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=main.__doc__.splitlines()[0])
     parser.add_argument("--selection", type=Path, default=subset.OUT_PATH)
     parser.add_argument("--image-dir", type=Path, default=fetch.IMAGE_DIR)
-    parser.add_argument("--out-dir", type=Path, default=CACHE_DIR)
+    parser.add_argument("--out-dir", type=Path)
+    parser.add_argument(
+        "--crop-index",
+        action="store_true",
+        help="classify every frame in the crop index instead of the spike's",
+    )
     parser.add_argument("--model", default=MODEL)
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument(
@@ -287,7 +330,14 @@ def main(argv=None):
         cmd[0] = sys.executable
         return subprocess.run(cmd, check=False).returncode
 
-    paths = pl.read_csv(args.selection).filter("classify")["path"].to_list()
+    if args.crop_index:
+        paths = crops.load_index()["path"].to_list()
+        args.out_dir = args.out_dir or CROP_CACHE_DIR
+        seeded = seed_from_spike(paths, args.image_dir, args.out_dir)
+        print(f"seeded {seeded} predictions from the spike")
+    else:
+        paths = pl.read_csv(args.selection).filter("classify")["path"].to_list()
+        args.out_dir = args.out_dir or CACHE_DIR
     files = write_inputs(
         paths,
         args.image_dir,

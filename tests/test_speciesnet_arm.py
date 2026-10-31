@@ -100,3 +100,37 @@ def test_prune_unfinished_keeps_only_finished(tmp_path):
     kept = json.loads(path.read_text())["predictions"]
     assert [p["filepath"] for p in kept] == ["a"]
     assert speciesnet_arm.prune_unfinished(tmp_path / "missing.json") == 0
+
+
+def test_seed_keeps_only_requested_images_and_never_overwrites(tmp_path):
+    """Seeding carries over the spike's answers for the new run's images only.
+
+    SpeciesNet refuses to resume from an output holding images outside its
+    input list, and an existing cache must never be replaced.
+    """
+    image_dir, spike_dir, out_dir = (
+        tmp_path / "img",
+        tmp_path / "spike",
+        tmp_path / "new",
+    )
+    spike_dir.mkdir()
+    spike = {
+        "info": {"format_version": "x"},
+        "predictions": [
+            {"filepath": str((image_dir / p).resolve())} for p in ("A/1.JPG", "A/2.JPG")
+        ],
+    }
+    (spike_dir / "predictions.json").write_text(json.dumps(spike))
+
+    seeded = speciesnet_arm.seed_from_spike(
+        ["A/1.JPG", "B/9.JPG"], image_dir, out_dir, spike_dir
+    )
+    written = json.loads((out_dir / "predictions.json").read_text())
+    assert seeded == 1
+    assert written["info"] == spike["info"]
+    assert [p["filepath"] for p in written["predictions"]] == [
+        str((image_dir / "A/1.JPG").resolve())
+    ]
+    assert (
+        speciesnet_arm.seed_from_spike(["A/2.JPG"], image_dir, out_dir, spike_dir) == 0
+    )

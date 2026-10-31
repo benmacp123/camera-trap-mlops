@@ -21,6 +21,7 @@ core = [
     "scikit-learn==1.9.1",
     "matplotlib==3.11.2",
     "mlflow==3.17.2",
+    "huggingface-hub==2.3.0",
 ]
 # Embedding and the trainable arms. torch comes from the CPU wheel index
 # (see [tool.uv.sources]); the PyPI Linux wheel pulls in about 3 GB of CUDA.

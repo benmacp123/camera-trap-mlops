@@ -244,3 +244,21 @@ def test_committed_index_rebuilds_from_raw(committed):
         frame, manifest.load_detections(), **crops.CROP_SETTINGS
     )
     assert rebuilt.equals(index) and rebuilt_excluded.equals(excluded)
+
+
+def test_crop_sizes_read_headers(tmp_path):
+    """Crop sizes are the stored crops' longer side, read back from disk."""
+    for name, size in (("A/1.JPG", (100, 100)), ("A/2.JPG", (300, 299))):
+        (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
+        Image.new("RGB", size).save(tmp_path / name)
+    sizes = crops.crop_sizes(["A/1.JPG", "A/2.JPG"], tmp_path)
+    assert sizes.rows() == [("A/1.JPG", 100), ("A/2.JPG", 300)]
+
+
+def test_committed_sizes_cover_the_index(committed):
+    """Every indexed crop has a committed size within the stored cap."""
+    _, index, _ = committed
+    sizes = crops.load_sizes(COMMITTED / "orinoquia_crop_sizes.csv")
+    assert sizes["path"].to_list() == index["path"].to_list()
+    assert sizes["side"].min() > 0
+    assert sizes["side"].max() <= crops.MAX_SIDE

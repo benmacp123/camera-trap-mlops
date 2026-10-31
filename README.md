@@ -60,7 +60,7 @@ flowchart TB
     mdv5a --> crops["Crop store<br>top 3 frames a sequence,<br>person frames dropped"]
     manifest --> crops
     crops --> misses["Detector-miss report<br>per site and class"]
-    crops --> embeddings[("Cached embeddings<br>local; Hugging Face Hub planned")]
+    crops --> embeddings[("Embedding caches<br>BioCLIP 2 and DINOv2 crops;<br>Hugging Face Hub planned")]
 
     subgraph arms ["Classifier arms"]
         direction LR

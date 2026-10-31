@@ -15,11 +15,15 @@ Two steps, each run as a script:
 - **write**: cut each indexed crop from its downloaded image and save it
   under ``data/crops/``, mirroring the image path. Resumes by skipping
   crops already on disk.
+- **sizes**: record each stored crop's side length, so reports can break
+  accuracy down by crop size without the crop store. Kept apart from the
+  index, whose hash the embedding caches record.
 
 ::
 
     PYTHONPATH=src python -m cameratrap.data.crops index
     PYTHONPATH=src python -m cameratrap.data.crops write
+    PYTHONPATH=src python -m cameratrap.data.crops sizes
 """
 
 import argparse
@@ -56,6 +60,7 @@ JPEG_OPTIONS = {"quality": 95, "subsampling": 0}
 INDEX_PATH = manifest.OUT_DIR / f"{orinoquia.NAME}_crops.csv"
 EXCLUDED_PATH = manifest.OUT_DIR / f"{orinoquia.NAME}_crops_excluded.csv"
 RECORD_PATH = manifest.OUT_DIR / f"{orinoquia.NAME}_crops.json"
+SIZES_PATH = manifest.OUT_DIR / f"{orinoquia.NAME}_crop_sizes.csv"
 CROP_DIR = Path("data/crops") / orinoquia.NAME
 
 INDEX_SCHEMA = {
@@ -280,6 +285,52 @@ def missing_crops(index, crop_dir):
     return sorted(p for p in index["path"] if not (crop_dir / p).exists())
 
 
+def crop_sizes(paths, crop_dir):
+    """Read each stored crop's side length from its JPEG header.
+
+    Args:
+        paths: Crop paths relative to ``crop_dir``.
+        crop_dir: Root of the crop store.
+
+    Returns:
+        A DataFrame with ``path`` and ``side`` (the longer side in pixels;
+        crops are square to within a pixel of rounding).
+    """
+    sides = []
+    for path in paths:
+        # Opening reads only the header; the pixels are never decoded.
+        with Image.open(crop_dir / path) as image:
+            sides.append(max(image.size))
+    return pl.DataFrame({"path": paths, "side": sides})
+
+
+def load_sizes(path=SIZES_PATH):
+    """Load the committed crop-size table.
+
+    Args:
+        path: Path to the sizes CSV.
+
+    Returns:
+        A DataFrame with ``path`` and ``side``.
+    """
+    return pl.read_csv(path, schema={"path": pl.String, "side": pl.Int64})
+
+
+def main_sizes(args):
+    """Write the crop-size table for every indexed crop.
+
+    Args:
+        args: Parsed arguments with ``index``, ``crop_dir`` and ``out``.
+
+    Returns:
+        Process exit status, 0 on success.
+    """
+    sizes = crop_sizes(load_index(args.index)["path"].to_list(), args.crop_dir)
+    sizes.write_csv(args.out)
+    print(f"{sizes.height} crop sizes -> {args.out}")
+    return 0
+
+
 def main_index(args):
     """Write the crop index, excluded frames and their record.
 
@@ -341,7 +392,7 @@ def main_write(args):
 
 
 def main(argv=None):
-    """Build the crop index or write the crops.
+    """Build the crop index, write the crops or record their sizes.
 
     Args:
         argv: Command-line arguments; defaults to ``sys.argv[1:]``.
@@ -362,8 +413,13 @@ def main(argv=None):
     write.add_argument("--image-dir", type=Path, default=fetch.IMAGE_DIR)
     write.add_argument("--crop-dir", type=Path, default=CROP_DIR)
     write.add_argument("--workers", type=int, default=8)
+    sizes = commands.add_parser("sizes", help="record the stored crops' sizes")
+    sizes.add_argument("--index", type=Path, default=INDEX_PATH)
+    sizes.add_argument("--crop-dir", type=Path, default=CROP_DIR)
+    sizes.add_argument("--out", type=Path, default=SIZES_PATH)
     args = parser.parse_args(argv)
-    return main_index(args) if args.command == "index" else main_write(args)
+    commands_run = {"index": main_index, "write": main_write, "sizes": main_sizes}
+    return commands_run[args.command](args)
 
 
 if __name__ == "__main__":
