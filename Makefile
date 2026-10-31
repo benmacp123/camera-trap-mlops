@@ -81,7 +81,9 @@ baselines: ## Zero-shot baselines per fold site from the caches; writes results/
 hub-stage: ## Write the files and dataset card to publish into data/hub_stage/
 	PYTHONPATH=src python -m cameratrap.embed.hub stage
 
-hub-upload: ## Owner only: upload data/hub_stage/ (REPO_ID=user/name, needs `hf auth login`)
+REPO_ID ?= benmacp123/orinoquia-crop-embeddings
+
+hub-upload: ## Owner only: upload data/hub_stage/ to REPO_ID (needs `hf auth login`)
 	PYTHONPATH=src python -m cameratrap.embed.hub upload --repo-id $(REPO_ID)
 
 test: ## Run the tests with coverage
