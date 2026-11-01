@@ -30,7 +30,7 @@ def test_clear_loss_rejects_on_margin():
     """A challenger worse everywhere fails the margin, whatever the tolerance."""
     decision = rule.decide(CHAMPION, shifted(np.linspace(-0.04, -0.02, 10)))
     assert not decision.promote
-    assert "margin" in decision.reasons[0]
+    assert any("margin" in r for r in decision.reasons)
     assert decision.regressions == []
 
 
@@ -45,18 +45,27 @@ def test_one_group_regression_blocks_a_mean_gain():
     assert len(decision.reasons) == 1
 
 
-def test_all_equal_is_non_inferior():
-    """Equal scores give the interval [0, 0], which clears the -1 point margin."""
+def test_all_equal_keeps_the_champion():
+    """A tie clears the -1 point margin but not the gain rule, so nothing changes."""
     decision = rule.decide(CHAMPION, dict(CHAMPION))
     assert decision.interval == (0.0, 0.0)
     assert decision.differences == {g: 0.0 for g in GROUPS}
+    assert not decision.promote
+    assert len(decision.reasons) == 1
+    assert "mean gain" in decision.reasons[0]
+
+
+def test_small_consistent_gain_promotes():
+    """A gain too small to beat the champion confidently still passes non-inferiority."""
+    decision = rule.decide(CHAMPION, shifted(np.linspace(0.0, 0.01, 10)))
+    assert decision.interval[0] < 0.01
     assert decision.promote
 
 
-def test_tie_fails_a_superiority_margin():
-    """With a margin of zero a tie is not enough: the lower bound must exceed it."""
-    config = rule.GateConfig(margin=0.0)
-    assert not rule.decide(CHAMPION, dict(CHAMPION), config).promote
+def test_gain_rule_can_be_relaxed():
+    """With the gain rule off, a tie is promoted on non-inferiority alone."""
+    config = rule.GateConfig(min_mean_gain=-1.0)
+    assert rule.decide(CHAMPION, dict(CHAMPION), config).promote
 
 
 def test_decision_is_reproducible():

@@ -76,9 +76,10 @@ crops. Per-site and per-class tables are in `results/detector/`.
 
 ### Calibrating the gate
 
-The gate promotes a challenger only if its mean per-site gain has a
-lower 95% bound (BCa bootstrap over sites) above a margin of −1 point
-*and* no single site regresses by more than a tolerance. The plan
+The gate promotes a challenger only if its mean per-site gain is above
+zero, the lower 95% bound of that gain (BCa bootstrap over sites) is
+above a margin of −1 point, and no single site regresses by more than a
+tolerance. A tie keeps the champion. The plan
 started the tolerance at 5 points. Before freezing it, the rule was
 tested on the fold sites with a swap null: the two models' predictions
 are swapped on a random half of each site's sequences, which mimics a

@@ -1,7 +1,10 @@
 """The promotion rule: a group-level paired comparison of two models.
 
-A challenger replaces the champion only if both hold:
+A challenger replaces the champion only if all three hold:
 
+- the mean per-group difference is above a minimum gain (zero by
+  default), so a tie keeps the champion: switching models has costs of
+  its own;
 - the lower end of a two-sided BCa bootstrap interval for the mean
   per-group difference (challenger minus champion) clears the
   non-inferiority margin, so on average it is not worse by more than the
@@ -28,6 +31,8 @@ class GateConfig:
         margin: Non-inferiority margin on the metric's scale; the lower
             bound of the mean difference must be above it (``-0.01`` lets
             a challenger be at most one point worse on average).
+        min_mean_gain: The observed mean difference must be above this;
+            ``0.0`` means a tie does not promote.
         tolerance: Largest regression allowed at any one group.
         confidence: Two-sided confidence level of the interval.
         resamples: Bootstrap resamples.
@@ -36,6 +41,7 @@ class GateConfig:
     """
 
     margin: float = -0.01
+    min_mean_gain: float = 0.0
     tolerance: float = 0.05
     confidence: float = 0.95
     resamples: int = 9999
@@ -139,10 +145,15 @@ def decide(champion, challenger, config=GateConfig()):
             f"{len(diffs)} groups, fewer than the {config.min_groups} required"
         )
     values = np.array(list(diffs.values()))
+    mean = float(values.mean())
     low, high = mean_interval(values, config)
     regressions = [g for g, d in diffs.items() if d < -config.tolerance]
 
     reasons = []
+    if mean <= config.min_mean_gain:
+        reasons.append(
+            f"mean gain {mean:+.3f} is not above {config.min_mean_gain:+.3f}"
+        )
     if low <= config.margin:
         reasons.append(
             f"lower bound {low:+.3f} does not clear the margin {config.margin:+.3f}"
@@ -154,7 +165,7 @@ def decide(champion, challenger, config=GateConfig()):
         )
     return GateDecision(
         promote=not reasons,
-        mean_difference=float(values.mean()),
+        mean_difference=mean,
         interval=(low, high),
         differences=diffs,
         regressions=regressions,
