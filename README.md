@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-Status: Phase 2 done. Every crop is embedded and both zero-shot models are scored on Orinoquía's fold sites; the hold-out is untouched.
+Status: Phase 2 done; the promotion gate is built and its tolerance is being calibrated on fold sites, ahead of the challengers (Phase 3). The hold-out is untouched and nothing is frozen yet.
 
 ## The question
 
@@ -74,6 +74,28 @@ concentrate in lowland tapir (3.5% of its sequences) and spotted paca
 detector also sees a person are dropped, costing 4 sequences their only
 crops. Per-site and per-class tables are in `results/detector/`.
 
+### Calibrating the gate
+
+The gate promotes a challenger only if its mean per-site gain has a
+lower 95% bound (BCa bootstrap over sites) above a margin of −1 point
+*and* no single site regresses by more than a tolerance. The plan
+started the tolerance at 5 points. Before freezing it, the rule was
+tested on the fold sites with a swap null: the two models' predictions
+are swapped on a random half of each site's sequences, which mimics a
+challenger exactly as good as the champion, and the share of draws in
+which some site regresses beyond the tolerance is the chance of
+blocking a challenger that is no worse.
+
+![Chance an equal challenger is blocked, by per-site tolerance](figures/gate_calibration.png)
+
+With BioCLIP 2 and SpeciesNet as a stand-in pair (they disagree on 19%
+of sequences at the median site), a 5-point tolerance blocks an equal
+challenger 68% of the time across ten sites; the rate falls to 5% only
+at about 18 points. A site's balanced accuracy rests on a few dozen to
+a few hundred sequences (median 128 here), so it moves several points
+when a handful of sequences flip. The run is repeated with the real
+challenger pair before the freeze; tables are in `results/gate/`.
+
 ## How it works
 
 The components are below. Solid parts are built; dashed parts are
@@ -104,9 +126,10 @@ flowchart TB
     speciesnet --> baselines["Zero-shot baselines<br>per fold site, class, crop size"]
     bioclip --> baselines
 
+    gate{{"Promotion gate<br>BCa site bootstrap,<br>margin and tolerance"}}
+
     subgraph lifecycle ["Lifecycle (planned)"]
         mlflow[("MLflow registry<br>@champion, @challenger")]
-        gate{{"Promotion gate<br>per-site paired bootstrap"}}
         report["Per-site trust report"]
         replay["Replay by date and site"]
         drift["Drift signals scored<br>against held-back labels"]
@@ -185,6 +208,7 @@ make embed            # optional: BioCLIP 2 and DINOv2 over every crop (about 6 
 make speciesnet-crops # optional: SpeciesNet over every crop frame (about 13 h on CPU)
 make embed-check      # re-embed 50 cached crops per backbone and compare
 make baselines        # zero-shot tables per fold site; writes results/baselines/ and figures/
+make gate-calibrate   # per-site tolerance false-block rates on fold sites; writes results/gate/
 ```
 
 The model outputs are published on the Hugging Face Hub, so the scoring
