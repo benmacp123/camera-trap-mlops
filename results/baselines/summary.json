@@ -1,0 +1,49 @@
+{
+  "settings": {
+    "min_site_sequences": 20,
+    "weak_site_threshold": 0.85,
+    "size_bins": [
+      112,
+      224
+    ]
+  },
+  "scope": "fold sites only; hold-out sealed until the Phase 4 freeze",
+  "frames": 20991,
+  "sequences": 7590,
+  "sites_scored": 38,
+  "arms": {
+    "bioclip2": {
+      "mean_site_balanced_accuracy": 0.8316276518537905,
+      "median_site_balanced_accuracy": 0.840467225537558,
+      "min_site_balanced_accuracy": 0.6399895951224855,
+      "weak_sites": 21
+    },
+    "speciesnet": {
+      "mean_site_balanced_accuracy": 0.9185233591514038,
+      "median_site_balanced_accuracy": 0.933619721473495,
+      "min_site_balanced_accuracy": 0.6908028403836677,
+      "weak_sites": 3
+    }
+  },
+  "speciesnet_open_set": {
+    "coverage": 0.8981554677206851,
+    "accuracy_when_answering": 0.9097843626228547
+  },
+  "bioclip2_cache": {
+    "backbone": "bioclip2",
+    "crop_jpeg": {
+      "quality": 95,
+      "subsampling": 0
+    },
+    "crop_max_side": 448,
+    "index": "data/manifest/orinoquia_crops.csv",
+    "index_sha256": "f8d3a53e38a4e757d36ba62d8231292e83a2776a948f0a7d401dd2386b96cfa2",
+    "input_size": 224,
+    "library": "open_clip 3.3.0",
+    "model_id": "imageomics/bioclip-2",
+    "normalised": "l2",
+    "revision": "2957b322090f9cb17ae72c71981c7218a28d81e0",
+    "torch": "2.14.1+cpu"
+  },
+  "note": "SpeciesNet has probably seen Orinoqu\u00eda; its scores are a reference only"
+}

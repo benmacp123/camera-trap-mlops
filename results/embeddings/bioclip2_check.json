@@ -1,0 +1,8 @@
+{
+  "backbone": "bioclip2",
+  "sample": 50,
+  "seed": 0,
+  "min_cosine": 0.9999999403953552,
+  "tolerance": 0.9999,
+  "passed": true
+}

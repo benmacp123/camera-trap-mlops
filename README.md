@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-Status: Phase 0 done. The first spike ran on Orinoquía's fold sites; the hold-out is untouched.
+Status: Phase 2 done. Every crop is embedded and both zero-shot models are scored on Orinoquía's fold sites; the hold-out is untouched.
 
 ## The question
 
@@ -19,24 +19,50 @@ everywhere would still be a complete result.
 
 ## Answer so far
 
-From the first spike, on 38 fold sites (5,337 sequences, nine species;
-none of the ten hold-out sites has been scored):
+Zero-shot baselines on every fold sequence: 38 sites, 7,590 sequences,
+nine species, up to three crops per sequence with logits averaged
+before softmax. None of the ten hold-out sites has been scored.
 
-- BioCLIP 2 zero-shot, the champion, averages 0.84 balanced accuracy
-  per site and falls below 0.85 at 18 of 38 sites; its weakest species
-  is collared peccary.
-- A linear probe on its frozen embeddings averages 0.89, +4.8 points.
-- SpeciesNet averages 0.92 restricted to the nine species, and answers
-  89% of sequences in its own open-set mode, 89% of them correctly. It
-  has probably seen these images (they went through Wildlife Insights),
-  so this is not held-out performance.
-- Mean model confidence tracks per-site accuracy closely (Spearman 0.87,
-  95% interval 0.73 to 0.93), a first hint that a label-free signal can
-  flag weak sites.
+![Zero-shot balanced accuracy per fold site, BioCLIP 2 and SpeciesNet](figures/baselines_per_site.png)
 
-The plan's rule for choosing the dataset asked for at least a quarter of
-sites below 0.85 with the best zero-shot model. Read against SpeciesNet
-that fails (3 of 38 sites); read against BioCLIP 2 it passes. The
+| Arm | Mean | Median | Worst site | Sites below 0.85 |
+| --- | --- | --- | --- | --- |
+| BioCLIP 2 zero-shot (champion) | 0.83 | 0.84 | 0.64 | 21 of 38 |
+| SpeciesNet, restricted to the nine species | 0.92 | 0.93 | 0.69 | 3 of 38 |
+
+Sequence-level balanced accuracy per site; sites with fewer than 20
+sequences are left out.
+
+- BioCLIP 2's main weakness is the two peccaries: it recalls only half
+  of collared peccary sequences and calls 37% of them white-lipped
+  peccary. Every other species is at 0.78 recall or above.
+- SpeciesNet answers 90% of sequences in its own open-set mode, 91% of
+  them correctly. It has probably seen these images (they went through
+  Wildlife Insights), so none of its scores here are held-out
+  performance.
+- Small crops are rare but much harder: 695 of 20,991 frames have a
+  long side under 224 px, and BioCLIP 2 gets about half of them right,
+  against 72% of larger crops.
+
+![BioCLIP 2 zero-shot confusion between species, fold sites](figures/baselines_confusion_bioclip2.png)
+
+The first spike, on a capped sample of the same sites (5,337
+sequences), gave two further pointers that later phases test properly:
+
+- A linear probe on BioCLIP 2's frozen embeddings averaged 0.89, +4.8
+  points over zero-shot.
+- Mean model confidence tracked per-site accuracy closely (Spearman
+  0.87, 95% interval 0.73 to 0.93), a first hint that a label-free
+  signal can flag weak sites.
+
+On the spike sample BioCLIP 2 averaged 0.84 with 18 weak sites; the
+full fold set adds the sequences the spike capped away (at most 100
+per class per site) and gives 0.83 and 21.
+
+The plan's rule for choosing the dataset, applied at the spike, asked
+for at least a quarter of sites below 0.85 with the best zero-shot
+model. Read against SpeciesNet that fails (3 of 38 sites); read against
+BioCLIP 2 it passes. The
 project uses the BioCLIP 2 reading because SpeciesNet's scores here are
 not held-out, a choice made after seeing the results and recorded as
 such.
@@ -60,7 +86,7 @@ flowchart TB
     mdv5a --> crops["Crop store<br>top 3 frames a sequence,<br>person frames dropped"]
     manifest --> crops
     crops --> misses["Detector-miss report<br>per site and class"]
-    crops --> embeddings[("Embedding caches<br>BioCLIP 2 and DINOv2 crops;<br>Hugging Face Hub planned")]
+    crops --> embeddings[("Embedding caches<br>BioCLIP 2 and DINOv2 crops;<br>published on Hugging Face Hub")]
 
     subgraph arms ["Classifier arms"]
         direction LR
@@ -74,6 +100,9 @@ flowchart TB
     embeddings --> bioclip
     embeddings --> probe
     crops -.-> cnn
+
+    speciesnet --> baselines["Zero-shot baselines<br>per fold site, class, crop size"]
+    bioclip --> baselines
 
     subgraph lifecycle ["Lifecycle (planned)"]
         mlflow[("MLflow registry<br>@champion, @challenger")]
@@ -152,11 +181,19 @@ make spike            # score the spike from those caches; writes results/spike/
 make detector-report  # detector misses per site and class; committed files only
 make fetch-crops      # optional: download every indexed image (20 GB) and check them
 make crops            # cut the 25,947 crops to data/crops/
+make embed            # optional: BioCLIP 2 and DINOv2 over every crop (about 6 h on CPU)
+make speciesnet-crops # optional: SpeciesNet over every crop frame (about 13 h on CPU)
+make embed-check      # re-embed 50 cached crops per backbone and compare
+make baselines        # zero-shot tables per fold site; writes results/baselines/ and figures/
 ```
 
-The spike's model outputs are cached locally for now; publishing the
-embeddings to the Hugging Face Hub, so the scoring can be reproduced
-without the images or a model run, is part of Phase 2.
+The model outputs are published on the Hugging Face Hub, so the scoring
+can be reproduced without downloading images or running a model:
+
+```bash
+make fetch-embeddings # no account needed; checks each file's SHA-256
+make baselines
+```
 
 `make help` lists every target.
 

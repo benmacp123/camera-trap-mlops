@@ -67,7 +67,7 @@ embed-check: ## Re-embed 50 cached crops per backbone and compare; writes result
 	PYTHONPATH=src python -m cameratrap.embed.backbones bioclip2 --check 50 --threads 4
 	PYTHONPATH=src python -m cameratrap.embed.backbones dinov2 --check 50 --threads 4
 
-speciesnet-crops: ## Run SpeciesNet over every crop-index frame, reusing the spike's answers (about 8.5 h)
+speciesnet-crops: ## Run SpeciesNet over every crop-index frame, reusing the spike's answers (about 13 h)
 	PYTHONPATH=src python -m cameratrap.arms.speciesnet_arm --crop-index
 
 # Everything below needs only committed files and the caches, which a fresh
