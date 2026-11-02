@@ -74,6 +74,33 @@ concentrate in lowland tapir (3.5% of its sequences) and spotted paca
 detector also sees a person are dropped, costing 4 sequences their only
 crops. Per-site and per-class tables are in `results/detector/`.
 
+### Adapted challengers
+
+A linear probe (class-balanced logistic regression) on each backbone's
+frozen crop embeddings, trained out of fold: every site is scored by a
+probe fitted only on the other folds' sites, with its regularisation
+chosen inside those training sites. Same frames, sequences and metric
+as the baselines (`make challengers`; tables in `results/challengers/`).
+
+| Arm (38 fold sites) | Mean | Median | Worst site | Sites below 0.85 | Mean gain over BioCLIP 2 |
+| --- | --- | --- | --- | --- | --- |
+| BioCLIP 2 zero-shot (champion) | 0.83 | 0.84 | 0.64 | 21 | — |
+| Probe on BioCLIP 2 | 0.89 | 0.91 | 0.71 | 10 | +5.6 points |
+| Probe on DINOv2 | 0.90 | 0.92 | 0.73 | 10 | +6.9 points |
+
+![Each probe's per-site gain over BioCLIP 2 zero-shot](figures/challengers_probe_gain.png)
+
+- Both probes improve 34 of 38 sites. These are fold-site scores, not
+  the gate's decision, which is taken once on the sealed hold-out.
+- The largest regressions are at small sites: the DINOv2 probe loses
+  12.7 points at N36, which has 24 sequences, and the BioCLIP 2 probe
+  loses 5.1 at N05 (45 sequences). This is the per-site noise the
+  gate's tolerance has to allow for.
+- DINOv2 was trained without species labels or text, yet its probe
+  matches BioCLIP 2's. With a few thousand labelled sequences, the
+  backbone's species knowledge matters less than the labels from these
+  sites.
+
 ### Calibrating the gate
 
 The gate promotes a challenger only if its mean per-site gain is above
@@ -115,7 +142,7 @@ flowchart TB
         direction LR
         speciesnet["SpeciesNet<br>zero-shot, COL geofence"]
         bioclip["BioCLIP 2<br>zero-shot"]
-        probe["Probe on BioCLIP 2<br>(kNN, DINOv2 planned)"]
+        probe["Probes on BioCLIP 2<br>and DINOv2 (kNN planned)"]
         cnn["Naive CNN fine-tune<br>(control, planned)"]
     end
 
@@ -124,8 +151,9 @@ flowchart TB
     embeddings --> probe
     crops -.-> cnn
 
-    speciesnet --> baselines["Zero-shot baselines<br>per fold site, class, crop size"]
+    speciesnet --> baselines["Per-site scores<br>zero-shot baselines and probes"]
     bioclip --> baselines
+    probe --> baselines
 
     gate{{"Promotion gate<br>BCa site bootstrap,<br>margin and tolerance"}}
 

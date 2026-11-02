@@ -1,0 +1,106 @@
+{
+  "settings": {
+    "min_site_sequences": 20,
+    "weak_site_threshold": 0.85,
+    "champion": "bioclip2",
+    "probe_backbones": [
+      "bioclip2",
+      "dinov2"
+    ],
+    "probe_cs": [
+      0.01,
+      0.03162277660168379,
+      0.1,
+      0.31622776601683794,
+      1.0,
+      3.1622776601683795,
+      10.0,
+      31.622776601683793,
+      100.0
+    ],
+    "probe_inner_folds": 3,
+    "regression_points": 0.05
+  },
+  "scope": "fold sites only; hold-out neither trained on nor scored",
+  "frames": 20991,
+  "sequences": 7590,
+  "sites_scored": 38,
+  "arms": {
+    "bioclip2": {
+      "mean_site_balanced_accuracy": 0.8316276518537905,
+      "median_site_balanced_accuracy": 0.840467225537558,
+      "min_site_balanced_accuracy": 0.6399895951224855,
+      "weak_sites": 21
+    },
+    "bioclip2_probe": {
+      "mean_site_balanced_accuracy": 0.888007009737735,
+      "median_site_balanced_accuracy": 0.9050608659642277,
+      "min_site_balanced_accuracy": 0.709225688660464,
+      "weak_sites": 10,
+      "mean_gain": 0.05637935788394488,
+      "median_gain": 0.055550692105211186,
+      "sites_improved": 34,
+      "sites_regressed_beyond_points": 1,
+      "worst_site_gain": -0.05092592592592604,
+      "chosen_c_per_fold": {
+        "fold0": 3.1622776601683795,
+        "fold1": 3.1622776601683795,
+        "fold2": 3.1622776601683795,
+        "fold3": 3.1622776601683795,
+        "fold4": 3.1622776601683795
+      }
+    },
+    "dinov2_probe": {
+      "mean_site_balanced_accuracy": 0.9003472585613871,
+      "median_site_balanced_accuracy": 0.9230747118410517,
+      "min_site_balanced_accuracy": 0.7294834929699154,
+      "weak_sites": 10,
+      "mean_gain": 0.06871960670759696,
+      "median_gain": 0.07141487950539005,
+      "sites_improved": 34,
+      "sites_regressed_beyond_points": 1,
+      "worst_site_gain": -0.1272727272727271,
+      "chosen_c_per_fold": {
+        "fold0": 3.1622776601683795,
+        "fold1": 1.0,
+        "fold2": 3.1622776601683795,
+        "fold3": 3.1622776601683795,
+        "fold4": 1.0
+      }
+    }
+  },
+  "caches": {
+    "bioclip2": {
+      "backbone": "bioclip2",
+      "crop_jpeg": {
+        "quality": 95,
+        "subsampling": 0
+      },
+      "crop_max_side": 448,
+      "index": "data/manifest/orinoquia_crops.csv",
+      "index_sha256": "f8d3a53e38a4e757d36ba62d8231292e83a2776a948f0a7d401dd2386b96cfa2",
+      "input_size": 224,
+      "library": "open_clip 3.3.0",
+      "model_id": "imageomics/bioclip-2",
+      "normalised": "l2",
+      "revision": "2957b322090f9cb17ae72c71981c7218a28d81e0",
+      "torch": "2.14.1+cpu"
+    },
+    "dinov2": {
+      "backbone": "dinov2",
+      "crop_jpeg": {
+        "quality": 95,
+        "subsampling": 0
+      },
+      "crop_max_side": 448,
+      "index": "data/manifest/orinoquia_crops.csv",
+      "index_sha256": "f8d3a53e38a4e757d36ba62d8231292e83a2776a948f0a7d401dd2386b96cfa2",
+      "input_size": 224,
+      "library": "timm 1.0.30",
+      "model_id": "timm/vit_base_patch14_dinov2.lvd142m",
+      "normalised": "l2",
+      "revision": "4685c99dabffe5affac90bd99dbffd25801ae58d",
+      "torch": "2.14.1+cpu"
+    }
+  }
+}

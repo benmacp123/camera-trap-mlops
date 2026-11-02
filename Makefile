@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -77,6 +77,9 @@ fetch-embeddings: ## Download the published caches (data/manifest/hub.json) into
 
 baselines: ## Zero-shot baselines per fold site from the caches; writes results/baselines/ and figures/
 	PYTHONPATH=src python -m cameratrap.report.baselines
+
+challengers: ## Out-of-fold probes on BioCLIP 2 and DINOv2 embeddings per fold site; writes results/challengers/ and figures/
+	PYTHONPATH=src python -m cameratrap.report.challengers
 
 gate-calibrate: ## Per-site tolerance false-block rates on fold sites; writes results/gate/ and figures/
 	PYTHONPATH=src python -m cameratrap.report.gate_calibration
