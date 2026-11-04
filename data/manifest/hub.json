@@ -1,0 +1,10 @@
+{
+  "repo_id": "benmacp123/orinoquia-crop-embeddings",
+  "repo_type": "dataset",
+  "revision": "c325f99666de3081bb934b0fc2bd8a305d247c27",
+  "files": {
+    "embeddings/bioclip2/embeddings.npz": "cce66af8036c4c53182a2b6a5855af65d8477bb44232605fe4438efe48a8657b",
+    "embeddings/dinov2/embeddings.npz": "61a4042ca2f764f31fb076c80a5329d3424ead8e617b191b2f80b7b69e1513de",
+    "speciesnet_crops/predictions.json": "1779275703db7ef431a69188fdb585a7c285ee7382367b596b227335bfc13510"
+  }
+}
