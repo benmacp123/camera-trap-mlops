@@ -3,7 +3,7 @@
     "min_site_sequences": 20,
     "weak_site_threshold": 0.85,
     "champion": "bioclip2",
-    "probe_backbones": [
+    "backbones": [
       "bioclip2",
       "dinov2"
     ],
@@ -19,6 +19,16 @@
       100.0
     ],
     "probe_inner_folds": 3,
+    "knn_ks": [
+      5,
+      10,
+      20,
+      50,
+      100,
+      200
+    ],
+    "knn_inner_folds": 3,
+    "knn_pseudo_count": 0.5,
     "regression_points": 0.05
   },
   "scope": "fold sites only; hold-out neither trained on nor scored",
@@ -50,6 +60,24 @@
         "fold4": 3.1622776601683795
       }
     },
+    "bioclip2_knn": {
+      "mean_site_balanced_accuracy": 0.8807697284622913,
+      "median_site_balanced_accuracy": 0.8966017825140808,
+      "min_site_balanced_accuracy": 0.6772072030959074,
+      "weak_sites": 10,
+      "mean_gain": 0.04914207660850113,
+      "median_gain": 0.04803550207961976,
+      "sites_improved": 31,
+      "sites_regressed_beyond_points": 0,
+      "worst_site_gain": -0.02083333333333337,
+      "chosen_k_per_fold": {
+        "fold0": 50,
+        "fold1": 50,
+        "fold2": 20,
+        "fold3": 100,
+        "fold4": 50
+      }
+    },
     "dinov2_probe": {
       "mean_site_balanced_accuracy": 0.9003472585613871,
       "median_site_balanced_accuracy": 0.9230747118410517,
@@ -66,6 +94,24 @@
         "fold2": 3.1622776601683795,
         "fold3": 3.1622776601683795,
         "fold4": 1.0
+      }
+    },
+    "dinov2_knn": {
+      "mean_site_balanced_accuracy": 0.8781066371954271,
+      "median_site_balanced_accuracy": 0.8943313728301787,
+      "min_site_balanced_accuracy": 0.6925477053506942,
+      "weak_sites": 12,
+      "mean_gain": 0.046478985341636934,
+      "median_gain": 0.04738328664799252,
+      "sites_improved": 32,
+      "sites_regressed_beyond_points": 3,
+      "worst_site_gain": -0.20006242197253432,
+      "chosen_k_per_fold": {
+        "fold0": 20,
+        "fold1": 50,
+        "fold2": 50,
+        "fold3": 50,
+        "fold4": 50
       }
     }
   },
