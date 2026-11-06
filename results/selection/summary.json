@@ -9,90 +9,70 @@
     ],
     "holdout_like_min_sequences": 49,
     "holdout_sites": 10,
-    "tolerances": [
-      0.02,
-      0.03,
-      0.04,
-      0.05,
-      0.06,
-      0.07,
-      0.08,
-      0.09,
-      0.1,
-      0.11,
-      0.12,
-      0.13,
-      0.14,
-      0.15,
-      0.16,
-      0.17,
-      0.18,
-      0.19,
-      0.2
-    ],
-    "draws": 2000,
-    "calibration_subsets": 5000,
-    "target_family_rate": 0.05,
     "gate_subsets": 2000,
     "seed": 0
   },
   "gate": {
     "margin": -0.01,
     "min_mean_gain": 0.0,
-    "tolerance": 0.05,
+    "family_alpha": 0.05,
+    "null_draws": 20000,
     "confidence": 0.95,
     "resamples": 9999,
     "seed": 0,
     "min_groups": 5
   },
+  "per_site_cutoff": 0.005,
   "scope": "fold sites only; hold-out never read",
   "chosen": "dinov2_probe",
-  "chosen_tolerance": 0.12,
   "challengers": [
     {
       "challenger": "bioclip2_probe",
       "sites": 33,
-      "mean_gain": 0.05804301356344708,
+      "mean_gain": 0.058043013563447064,
       "worst_gain": -0.039686217649209765,
-      "tolerance": 0.15,
+      "sites_below_cutoff": 0,
       "pass_rate": 1.0,
       "pass_rate_se": 0.0,
       "fail_mean_gain": 0.0,
       "fail_margin": 0.0,
-      "fail_tolerance": 0.0
+      "fail_site_drop": 0.0
     },
     {
       "challenger": "bioclip2_knn",
       "sites": 33,
       "mean_gain": 0.05064530348542869,
       "worst_gain": -0.02058567294366731,
-      "tolerance": 0.15,
+      "sites_below_cutoff": 0,
       "pass_rate": 1.0,
       "pass_rate_se": 0.0,
       "fail_mean_gain": 0.0,
       "fail_margin": 0.0,
-      "fail_tolerance": 0.0
+      "fail_site_drop": 0.0
     },
     {
       "challenger": "dinov2_probe",
       "sites": 33,
       "mean_gain": 0.07232059220070218,
       "worst_gain": -0.02777777777777779,
-      "tolerance": 0.12,
+      "sites_below_cutoff": 0,
       "pass_rate": 1.0,
       "pass_rate_se": 0.0,
       "fail_mean_gain": 0.0,
       "fail_margin": 0.0,
-      "fail_tolerance": 0.0
+      "fail_site_drop": 0.0
     },
     {
       "challenger": "dinov2_knn",
       "sites": 33,
       "mean_gain": 0.048956124010086456,
       "worst_gain": -0.20006242197253432,
-      "tolerance": null,
-      "pass_rate": null,
-      "pass_rate_se": null
+      "sites_below_cutoff": 0,
+      "pass_rate": 0.702,
+      "pass_rate_se": 0.010227316363543274,
+      "fail_mean_gain": 0.003,
+      "fail_margin": 0.298,
+      "fail_site_drop": 0.0
     }
   ]
 }

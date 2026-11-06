@@ -4,6 +4,7 @@ import numpy as np
 import polars as pl
 import pytest
 
+from cameratrap.gate import rule
 from cameratrap.report import selection
 
 CLASSES = ["a", "b", "c"]
@@ -14,18 +15,18 @@ GOOD, BAD, COPY = "bioclip2_probe", "dinov2_knn", "bioclip2_knn"
 
 @pytest.fixture(name="small_settings", autouse=True)
 def fixture_small_settings(monkeypatch):
-    """Shrink the settings so the selection runs on a few synthetic sites."""
+    """Shrink the settings and the gate's draws so the selection runs quickly."""
     settings = dict(
         selection.SETTINGS,
         challengers=[GOOD, BAD, COPY],
         holdout_like_min_sequences=30,
         holdout_sites=5,
-        tolerances=[0.02, 0.05, 0.10, 0.40],
-        draws=200,
-        calibration_subsets=100,
         gate_subsets=40,
     )
     monkeypatch.setattr(selection, "SETTINGS", settings)
+    monkeypatch.setattr(
+        selection, "GATE", rule.GateConfig(null_draws=500, resamples=999)
+    )
     return settings
 
 
@@ -92,7 +93,6 @@ def test_clear_improvement_is_chosen(result):
     summary, _, _ = result
     assert summary["chosen"] == GOOD
     assert by_arm(summary)[GOOD]["pass_rate"] > 0.9
-    assert summary["chosen_tolerance"] == by_arm(summary)[GOOD]["tolerance"]
 
 
 def test_regression_never_passes(result):
@@ -108,8 +108,6 @@ def test_a_copy_of_the_champion_never_promotes(result):
     summary, _, _ = result
     row = by_arm(summary)[COPY]
     assert row["mean_gain"] == 0
-    # The swap null of identical predictions is exactly zero everywhere.
-    assert row["tolerance"] == selection.SETTINGS["tolerances"][0]
     assert row["pass_rate"] == 0
     assert row["fail_mean_gain"] == 1
 
@@ -131,19 +129,32 @@ def test_site_sets_are_reproducible_and_distinct():
     assert all(len(set(s)) == 5 for s in first)
 
 
-def test_calibration_curve_covers_every_tolerance(result):
-    """One family rate per challenger and candidate tolerance."""
-    _, _, curves = result
-    assert curves.height == 3 * len(selection.SETTINGS["tolerances"])
+def test_site_table_has_a_row_per_challenger_and_site(result):
+    """Each challenger is tested at every hold-out-sized site."""
+    _, _, sites = result
+    assert sites.height == 3 * 12
 
 
-def test_no_tolerance_meeting_the_target_makes_an_arm_ineligible(tmp_path, monkeypatch):
-    """A per-site check that blocks equal challengers too often rules the arm out."""
-    monkeypatch.setitem(selection.SETTINGS, "tolerances", [0.0])
-    summary, _, _ = selection.run(load(write_sequences(tmp_path)))
-    assert by_arm(summary)[GOOD]["tolerance"] is None
-    assert by_arm(summary)[GOOD]["pass_rate"] is None
-    assert summary["chosen"] != GOOD
+def test_a_real_drop_is_below_the_cutoff_and_a_copy_never_is(result):
+    """The worse arm's drops are flagged at well-measured sites; a copy has p = 1."""
+    summary, _, sites = result
+    assert by_arm(summary)[BAD]["sites_below_cutoff"] > 0
+    copy = sites.filter(sites["challenger_arm"] == COPY)
+    assert (copy["p_value"] == 1.0).all()
+    assert by_arm(summary)[COPY]["sites_below_cutoff"] == 0
+
+
+def test_rulers_are_wider_at_smaller_sites(tmp_path):
+    """Chance moves a small site's score more, so it is allowed a larger drop."""
+    write_sequences(tmp_path, sites=6, per_site=40)
+    small = selection.site_tests(
+        selection.site_groups(load(tmp_path), CHAMPION, GOOD, 30), selection.GATE, 5
+    )
+    write_sequences(tmp_path, sites=6, per_site=600)
+    large = selection.site_tests(
+        selection.site_groups(load(tmp_path), CHAMPION, GOOD, 30), selection.GATE, 5
+    )
+    assert small["ruler"].median() > 2 * large["ruler"].median()
 
 
 def test_mismatched_sequences_are_refused(tmp_path):
@@ -169,6 +180,6 @@ def test_main_writes_outputs(tmp_path):
         ]
     )
     assert status == 0
-    for name in ("selection.csv", "tolerance_curves.csv", "summary.json"):
+    for name in ("selection.csv", "site_tests.csv", "summary.json"):
         assert (tmp_path / "out" / name).exists()
     assert (tmp_path / "fig" / "challenger_selection.png").exists()

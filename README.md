@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-Status: Phase 2 done; the promotion gate is built and its tolerance is being calibrated on fold sites, ahead of the challengers (Phase 3). The hold-out is untouched and nothing is frozen yet.
+Status: Phase 3 in progress. Probe and kNN challengers are scored on fold sites, and the DINOv2 probe is chosen as the one challenger to face the hold-out. The hold-out is untouched; the gate settings are about to be frozen.
 
 ## The question
 
@@ -110,7 +110,7 @@ training sites. Same frames, sequences and metric as the baselines
   training crops sit closest.
 - The largest regressions are otherwise at small sites (the DINOv2
   probe loses 12.7 points at N36, which has 24 sequences). This is
-  the per-site noise the gate's tolerance has to allow for.
+  the per-site noise the gate has to allow for.
 - DINOv2 was trained without species labels or text, yet its probe
   matches BioCLIP 2's. With a few thousand labelled sequences, the
   backbone's species knowledge matters less than the labels from these
@@ -126,28 +126,64 @@ reported as a lower bound rather than extended again. Every curve now
 peaks inside the grid, mostly at 50, and the kNN scores moved by at
 most 0.1 points.
 
-### Calibrating the gate
+### The gate's per-site check
 
 The gate promotes a challenger only if its mean per-site gain is above
 zero, the lower 95% bound of that gain (BCa bootstrap over sites) is
-above a margin of −1 point, and no single site regresses by more than a
-tolerance. A tie keeps the champion. The plan
-started the tolerance at 5 points. Before freezing it, the rule was
-tested on the fold sites with a swap null: the two models' predictions
-are swapped on a random half of each site's sequences, which mimics a
-challenger exactly as good as the champion, and the share of draws in
-which some site regresses beyond the tolerance is the chance of
-blocking a challenger that is no worse.
+above a margin of −1 point, and no single site drops by more than
+chance explains there. A tie keeps the champion.
 
-![Chance an equal challenger is blocked, by per-site tolerance](figures/gate_calibration.png)
+The plan started with a fixed per-site tolerance of 5 points. A swap
+null showed why that fails: swapping the two models' predictions on a
+random half of a site's sequences mimics a challenger exactly as good
+as the champion, and with the real challengers a fixed tolerance had to
+be 12 to 15 points before an equal challenger was blocked less than 5%
+of the time across ten sites. That allowance is set by the noisiest
+site, so it means nothing at a site with a thousand sequences.
 
-With BioCLIP 2 and SpeciesNet as a stand-in pair (they disagree on 19%
-of sequences at the median site), a 5-point tolerance blocks an equal
-challenger 68% of the time across ten sites; the rate falls to 5% only
-at about 18 points. A site's balanced accuracy rests on a few dozen to
-a few hundred sequences (median 128 here), so it moves several points
-when a handful of sequences flip. The run is repeated with the real
-challenger pair before the freeze; tables are in `results/gate/`.
+![Chance an equal challenger is blocked, by fixed per-site tolerance](figures/gate_calibration.png)
+
+So each site is judged against its own noise. The swap null gives the
+site's drop a p-value, and the site blocks promotion if that p-value is
+below 5% divided by the number of sites (a Bonferroni correction). The
+chance of wrongly blocking an equal challenger stays at most 5% however
+many sites a deployment has, and each site's allowance follows its own
+size and how often the two models disagree there. The figure above is
+the earlier stand-in calibration (BioCLIP 2 against SpeciesNet), kept
+for the record; `make gate-calibrate` reproduces it.
+
+### Choosing the hold-out challenger
+
+Sending all four challengers to the hold-out and promoting whichever
+passed would be four tries at one exam. So one is chosen first, on fold
+sites only: the full gate is run on 2,000 random sets of ten fold sites
+of hold-out size (at least 49 sequences, 33 sites), the same sets for
+every challenger, and the challenger with the highest pass rate goes
+forward, ties going to the larger mean gain.
+
+![Each site's allowed drop against its size, and each challenger's simulated gate pass rate](figures/challenger_selection.png)
+
+| Challenger | Pass rate | Mean gain (points) | Worst site (points) |
+|---|---|---|---|
+| DINOv2 probe | 100% | +7.2 | −2.8 |
+| BioCLIP 2 probe | 100% | +5.8 | −4.0 |
+| BioCLIP 2 kNN | 100% | +5.1 | −2.1 |
+| DINOv2 kNN | 70% | +4.9 | −20.0 |
+
+- Three challengers pass every set, so the tie-break decides: the
+  **DINOv2 probe** goes to the hold-out. Its lead is small but real:
+  +1.4 points over the BioCLIP 2 probe, 95% BCa interval +0.1 to +2.8,
+  paired by site.
+- It was picked for scoring highest, so its fold-site gain flatters it
+  (the winner's curse); expect less on the hold-out.
+- Allowed drops (left) run from about 2 points at the largest sites to
+  over 20 at a few mid-sized ones. Size alone does not set them: a site
+  where the two models disagree often, or where a species has only one
+  or two sequences, is noisier.
+- DINOv2 kNN's 20-point loss at N21 is not flagged. Nearly all of it is
+  one sequence: N21 has a single white-lipped peccary, worth a sixth of
+  the site's balanced accuracy. kNN still fails 30% of sets, on the
+  margin, because that site drags the lower bound down.
 
 ## How it works
 
@@ -180,7 +216,7 @@ flowchart TB
     bioclip --> baselines
     probe --> baselines
 
-    gate{{"Promotion gate<br>BCa site bootstrap,<br>margin and tolerance"}}
+    gate{{"Promotion gate<br>BCa site bootstrap, margin,<br>noise-aware per-site check"}}
 
     subgraph lifecycle ["Lifecycle (planned)"]
         mlflow[("MLflow registry<br>@champion, @challenger")]
@@ -262,7 +298,9 @@ make embed            # optional: BioCLIP 2 and DINOv2 over every crop (about 6 
 make speciesnet-crops # optional: SpeciesNet over every crop frame (about 13 h on CPU)
 make embed-check      # re-embed 50 cached crops per backbone and compare
 make baselines        # zero-shot tables per fold site; writes results/baselines/ and figures/
-make gate-calibrate   # per-site tolerance false-block rates on fold sites; writes results/gate/
+make challengers      # probes and kNN per fold site (about 12 min); writes results/challengers/
+make select-challenger # choose the hold-out challenger by simulated gate pass rate (about 8 min); writes results/selection/
+make gate-calibrate   # fixed-tolerance false-block rates (stand-in pair, kept for the record); writes results/gate/
 ```
 
 The model outputs are published on the Hugging Face Hub, so the scoring

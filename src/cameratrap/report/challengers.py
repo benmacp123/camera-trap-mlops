@@ -44,7 +44,7 @@ SETTINGS = {
     "knn_ks": list(knn.KS),
     "knn_inner_folds": knn.INNER_FOLDS,
     "knn_pseudo_count": knn.PSEUDO_COUNT,
-    # Reported only; the gate's own tolerance is still open.
+    # Reported only; the gate judges each site's drop against chance instead.
     "regression_points": 0.05,
 }
 OUT_DIR = Path("results/challengers")

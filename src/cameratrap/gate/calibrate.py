@@ -1,12 +1,16 @@
-"""How often the per-group tolerance blocks a challenger that is no worse.
+"""The swap null: how far chance alone moves a per-group difference.
 
-The swap null: if two models are equally good, which of them made a
+If two models are equally good, which of them made a
 given prediction carries no information, so swapping their predictions
 for a random half of the items leaves the joint distribution unchanged.
 Repeating the swap gives the spread of per-group differences that chance
-alone produces, kept paired on the same items. The share of draws in
-which some group regresses beyond the tolerance is the rule's
-false-block rate for that pair of models.
+alone produces, kept paired on the same items.
+
+Two uses: ``p_value`` says how surprising one group's drop is under that
+null, which is the gate's noise-aware per-group check; and
+``false_block_rates`` measures how often a fixed per-group tolerance
+would block a challenger that is no worse, which is why the gate no
+longer uses one.
 
 Generic over groups and metrics, so it stays within the gate's imports.
 """
@@ -86,3 +90,21 @@ def family_rate(rates, size, subsets=5000, seed=0):
         chosen = rng.choice(len(table), size=size, replace=False)
         total += 1 - np.prod(1 - table[chosen], axis=0)
     return total / subsets
+
+
+def p_value(null, observed):
+    """Return the one-sided chance of a drop at least as large as observed.
+
+    Adding one to the count and the total counts the observed result as
+    one of the draws, so the p-value is never exactly zero, which a
+    finite number of draws could not support.
+
+    Args:
+        null: Differences from ``null_differences``.
+        observed: The real difference, challenger minus champion.
+
+    Returns:
+        The p-value in (0, 1].
+    """
+    null = np.asarray(null)
+    return float((1 + np.sum(null <= observed)) / (null.size + 1))
