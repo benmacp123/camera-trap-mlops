@@ -1,0 +1,18 @@
+{
+  "freeze_sha256": "774fff882764979a051792f1a0c1fe4e595f043141095b32f6cd3d28fe203933",
+  "champion": "bioclip2",
+  "challenger": "dinov2_probe",
+  "promote": true,
+  "mean_gain": 0.09717557453845702,
+  "interval": [
+    0.054962577779462445,
+    0.14951602437257708
+  ],
+  "per_site_cutoff": 0.005,
+  "regressions": [],
+  "reasons": [],
+  "sequences": 1799,
+  "training_frames": 20991,
+  "chosen_c": 3.1622776601683795,
+  "fold_sites_mean_gain": 0.07232059220070218
+}

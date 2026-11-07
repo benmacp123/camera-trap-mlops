@@ -180,6 +180,17 @@ def test_real_index_matches_the_freeze_without_scoring():
     assert not set(train["site"].to_list()) & set(config["holdout_sites"])
 
 
+def test_the_committed_result_came_from_the_freeze():
+    """The reported decision was made under the pinned freeze and matches its table."""
+    out = ROOT / holdout.OUT_DIR
+    summary = json.loads((out / "summary.json").read_text())
+    per_site = pl.read_csv(out / "per_site.csv")
+    config, _ = freeze.load(ROOT / holdout_freeze.OUT_PATH)
+    assert summary["freeze_sha256"] == FROZEN_SHA256
+    assert sorted(per_site["site"].to_list()) == config["holdout_sites"]
+    assert summary["mean_gain"] == pytest.approx(per_site["gain"].mean())
+
+
 def test_a_clear_improvement_is_promoted(repo):
     """A probe that learns what zero-shot misses passes the gate."""
     _, _, index, config, gate = repo

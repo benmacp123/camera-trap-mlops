@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-Status: Phase 3 in progress. Probe and kNN challengers are scored on fold sites, and the DINOv2 probe is chosen as the one challenger to face the hold-out. The hold-out is untouched; the gate settings are about to be frozen.
+Status: Phase 3 in progress. The hold-out has been scored once under the freeze: the DINOv2 probe passed the gate and replaces BioCLIP 2 zero-shot as champion. The naive CNN control is next.
 
 ## The question
 
@@ -19,9 +19,36 @@ everywhere would still be a complete result.
 
 ## Answer so far
 
+**On ten sites held out until the settings were frozen, a linear probe on
+DINOv2 embeddings passed the promotion gate against BioCLIP 2 zero-shot.**
+Its mean gain is +9.7 points of sequence-level balanced accuracy (95% BCa
+interval +5.5 to +15.0), and it improved at all ten sites.
+
+![Gain of the DINOv2 probe over BioCLIP 2 zero-shot at each hold-out site](figures/holdout_gate.png)
+
+| Site mean, 10 hold-out sites | Balanced accuracy |
+| --- | --- |
+| BioCLIP 2 zero-shot | 0.836 |
+| DINOv2 probe | 0.933 |
+
+- The largest single improvement is collared peccary, BioCLIP 2's known
+  weakness: pooled recall rises from 0.63 to 0.86 over 491 sequences. Lowland
+  tapir falls from 0.95 to 0.90, which is one sequence of 20.
+- The smallest gains are near zero: +0.2 at N14, +0.7 at N00, +1.3 at N31. No
+  site dropped, so the per-site check had nothing to judge.
+- The gain is above the fold sites' +7.2, not below as forecast, but the
+  interval includes +7.2, so this is not evidence of a larger true gain.
+  Looked at after the fact, the three hold-out sites named A gain +18.0 and the
+  seven named N gain +6.2 (fold sites: +9.3 and +6.9). Three sites are too
+  few to explain this.
+- **What it does not show.** These are new sites in the same study region, so
+  it says nothing about a new region. The probe needs labelled data from the
+  region, where zero-shot needs none. The hold-out is now spent: anything later
+  scored on it is reported for comparison and cannot be a fresh test.
+
 Zero-shot baselines on every fold sequence: 38 sites, 7,590 sequences,
 nine species, up to three crops per sequence with logits averaged
-before softmax. None of the ten hold-out sites has been scored.
+before softmax.
 
 ![Zero-shot balanced accuracy per fold site, BioCLIP 2 and SpeciesNet](figures/baselines_per_site.png)
 
@@ -175,7 +202,8 @@ forward, ties going to the larger mean gain.
   +1.4 points over the BioCLIP 2 probe, 95% BCa interval +0.1 to +2.8,
   paired by site.
 - It was picked for scoring highest, so its fold-site gain flatters it
-  (the winner's curse); expect less on the hold-out.
+  (the winner's curse), so less was expected on the hold-out. It scored
+  +9.7, with an interval that includes +7.2.
 - Allowed drops (left) run from about 2 points at the largest sites to
   over 20 at a few mid-sized ones. Size alone does not set them: a site
   where the two models disagree often, or where a species has only one
@@ -294,16 +322,14 @@ versions.
 or the data under it fails the tests and shows up in the git history.
 
 The hold-out is one shot. Its result is reported whether the challenger
-passes or fails, and a fail does not send another challenger in. Expect the
-score to fall from the fold sites' +7.2 points: it was the best of four, so
-it carries some selection luck (the winner's curse).
+passes or fails, and a fail does not send another challenger in.
 
 `make holdout-check` runs every check (freeze hash, inputs, recipe, library
 versions, embeddings covering every frame) and stops before fitting or scoring
 anything. `make holdout` then fits the challenger on every fold-site frame,
 scores both arms on the ten sites, runs the gate and writes `results/holdout/`.
 It refuses to overwrite a result; to reproduce one, pass another `--out-dir`
-and compare. **The hold-out has not been scored yet.**
+and compare. A rerun here (about 2 minutes) matched every output byte for byte.
 
 ## Tracking
 
