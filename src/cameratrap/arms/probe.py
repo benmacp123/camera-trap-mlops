@@ -13,6 +13,11 @@ from sklearn.model_selection import GroupKFold
 # Fixed before the spike (provisional judgement, 2026-10-28).
 CS = np.logspace(-2, 2, 9)
 INNER_FOLDS = 3
+# Fixed with CS; the hold-out freeze records these, and a test checks
+# the code still matches it.
+CLASS_WEIGHT = "balanced"
+MAX_ITER = 5000
+INNER_SCORING = "balanced_accuracy"
 
 
 def fit(features, labels, groups, classes, inner_folds=INNER_FOLDS, cs=CS):
@@ -37,9 +42,9 @@ def fit(features, labels, groups, classes, inner_folds=INNER_FOLDS, cs=CS):
         Cs=cs,
         cv=splits,
         l1_ratios=(0.0,),
-        class_weight="balanced",
-        max_iter=5000,
-        scoring="balanced_accuracy",
+        class_weight=CLASS_WEIGHT,
+        max_iter=MAX_ITER,
+        scoring=INNER_SCORING,
         use_legacy_attributes=False,
     ).fit(features, y)
 

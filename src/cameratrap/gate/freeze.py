@@ -8,6 +8,7 @@ hold-out is scored, so any later change to the file is detectable.
 import hashlib
 import json
 from dataclasses import asdict
+from pathlib import Path
 
 from cameratrap.gate.rule import GateConfig
 
@@ -78,6 +79,43 @@ def load(path, expected_sha256=None):
     if expected_sha256 is not None and stored != expected_sha256:
         raise ValueError(f"{path} is not the config frozen as {expected_sha256}")
     return config, GateConfig(**config["gate"])
+
+
+def file_sha256(path):
+    """Return the SHA-256 of a file's bytes.
+
+    Args:
+        path: A ``pathlib.Path``.
+
+    Returns:
+        The hex digest.
+    """
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def check_files(hashes, root="."):
+    """Check that the files a frozen config was built from have not changed.
+
+    The hash of the config only protects the config's own text. A frozen
+    recipe is just as void if the data under it moved, so the config also
+    records its inputs' hashes and this compares them.
+
+    Args:
+        hashes: A dict of file path, relative to ``root``, to SHA-256.
+        root: The folder the paths are relative to.
+
+    Raises:
+        ValueError: If a file is missing or its content differs.
+    """
+    changed = []
+    for name, expected in sorted(hashes.items()):
+        path = Path(root) / name
+        if not path.exists():
+            changed.append(f"{name} (missing)")
+        elif file_sha256(path) != expected:
+            changed.append(name)
+    if changed:
+        raise ValueError(f"frozen inputs changed: {', '.join(changed)}")
 
 
 def gate_dict(gate_config):

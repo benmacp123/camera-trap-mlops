@@ -1,0 +1,119 @@
+{
+  "config": {
+    "challenger": {
+      "arm": "dinov2_probe",
+      "backbone": "dinov2",
+      "class_weight": "balanced",
+      "cs": [
+        0.01,
+        0.03162277660168379,
+        0.1,
+        0.31622776601683794,
+        1.0,
+        3.1622776601683795,
+        10.0,
+        31.622776601683793,
+        100.0
+      ],
+      "embedding": {
+        "backbone": "dinov2",
+        "crop_jpeg": {
+          "quality": 95,
+          "subsampling": 0
+        },
+        "crop_max_side": 448,
+        "index": "data/manifest/orinoquia_crops.csv",
+        "index_sha256": "f8d3a53e38a4e757d36ba62d8231292e83a2776a948f0a7d401dd2386b96cfa2",
+        "input_size": 224,
+        "library": "timm 1.0.30",
+        "model_id": "timm/vit_base_patch14_dinov2.lvd142m",
+        "normalised": "l2",
+        "revision": "4685c99dabffe5affac90bd99dbffd25801ae58d",
+        "torch": "2.14.1+cpu"
+      },
+      "inner_folds": 3,
+      "inner_scoring": "balanced_accuracy",
+      "inner_split": "GroupKFold by site, within the training sites",
+      "max_iter": 5000,
+      "method": "probe",
+      "regularisation": "l2",
+      "train_on": "every frame of every fold site; no hold-out frame"
+    },
+    "champion": {
+      "arm": "bioclip2",
+      "backbone": "bioclip2",
+      "embedding": {
+        "backbone": "bioclip2",
+        "crop_jpeg": {
+          "quality": 95,
+          "subsampling": 0
+        },
+        "crop_max_side": 448,
+        "index": "data/manifest/orinoquia_crops.csv",
+        "index_sha256": "f8d3a53e38a4e757d36ba62d8231292e83a2776a948f0a7d401dd2386b96cfa2",
+        "input_size": 224,
+        "library": "open_clip 3.3.0",
+        "model_id": "imageomics/bioclip-2",
+        "normalised": "l2",
+        "revision": "2957b322090f9cb17ae72c71981c7218a28d81e0",
+        "torch": "2.14.1+cpu"
+      },
+      "method": "zero_shot"
+    },
+    "embeddings": {
+      "files": {
+        "embeddings/bioclip2/embeddings.npz": "cce66af8036c4c53182a2b6a5855af65d8477bb44232605fe4438efe48a8657b",
+        "embeddings/dinov2/embeddings.npz": "61a4042ca2f764f31fb076c80a5329d3424ead8e617b191b2f80b7b69e1513de",
+        "speciesnet_crops/predictions.json": "1779275703db7ef431a69188fdb585a7c285ee7382367b596b227335bfc13510"
+      },
+      "repo_id": "benmacp123/orinoquia-crop-embeddings",
+      "repo_type": "dataset",
+      "revision": "c325f99666de3081bb934b0fc2bd8a305d247c27"
+    },
+    "frozen_on": "2026-11-07",
+    "gate": {
+      "confidence": 0.95,
+      "family_alpha": 0.05,
+      "margin": -0.01,
+      "min_groups": 5,
+      "min_mean_gain": 0.0,
+      "null_draws": 20000,
+      "resamples": 9999,
+      "seed": 0
+    },
+    "holdout_sites": [
+      "A02",
+      "A03",
+      "A07",
+      "N00",
+      "N13",
+      "N14",
+      "N19",
+      "N23",
+      "N31",
+      "N33"
+    ],
+    "inputs": {
+      "data/manifest/hub.json": "72d5c1c35fc724361e939bf2c60dc5a90e7a74e1438d84569b1ef860b0e8db87",
+      "data/manifest/orinoquia_crops.csv": "f8d3a53e38a4e757d36ba62d8231292e83a2776a948f0a7d401dd2386b96cfa2",
+      "data/manifest/orinoquia_crops.json": "bc2dae6c10040f272e628cfde5da1c4bd3c70601b752be36977c2e1364cfbd29",
+      "results/challengers/summary.json": "c2be0f2f7d660e17405e2db31199bb8e3ec994e86af291d9d454b849008b7ab8",
+      "results/selection/summary.json": "36a04351b08b7b1f4fab47c463ee53fe0fb402db67212472ee9be52ec7d2eb66"
+    },
+    "metric": {
+      "aggregation": "frame logits averaged per sequence, then softmax",
+      "classes": "those present at the site",
+      "frames_per_sequence": 3,
+      "name": "balanced_accuracy",
+      "unit": "sequence"
+    },
+    "software": {
+      "numpy": "2.5.4",
+      "polars": "2.0.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1"
+    },
+    "splits_sha256": "f727241c14c456dbf5131d352acf65676abc706c86aeecf6a29aefae1392f942"
+  },
+  "sha256": "774fff882764979a051792f1a0c1fe4e595f043141095b32f6cd3d28fe203933"
+}

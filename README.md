@@ -277,6 +277,27 @@ checking the precomputed detections against a fresh run. `make fetch`
 downloads them (about 11 GB) and writes each image's SHA-256 into the
 manifest, so a later download can be checked against it.
 
+## The hold-out freeze
+
+[`config/holdout_freeze.json`](config/holdout_freeze.json) is the
+pre-registration record: it fixes everything the hold-out decision depends
+on before the hold-out is scored. It holds the gate's settings, the ten
+sites, the metric, the champion, the one challenger (DINOv2 probe), and how
+that challenger is trained, down to the C grid and inner split. Freezing
+only the challenger's name would leave its training open to adjustment after
+seeing the result. It also records the hashes of the files it rests on (crop
+index, published embeddings, selection results) and the numerical library
+versions.
+
+`make freeze` writes it once and refuses to overwrite it, and
+`tests/test_holdout_freeze.py` pins its SHA-256, so any change to the file
+or the data under it fails the tests and shows up in the git history.
+
+The hold-out is one shot. Its result is reported whether the challenger
+passes or fails, and a fail does not send another challenger in. Expect the
+score to fall from the fold sites' +7.2 points: it was the best of four, so
+it carries some selection luck (the winner's curse).
+
 ## Reproducing
 
 Needs [uv](https://docs.astral.sh/uv/) and nothing else: no accounts or
@@ -300,6 +321,7 @@ make embed-check      # re-embed 50 cached crops per backbone and compare
 make baselines        # zero-shot tables per fold site; writes results/baselines/ and figures/
 make challengers      # probes and kNN per fold site (about 12 min); writes results/challengers/
 make select-challenger # choose the hold-out challenger by simulated gate pass rate (about 8 min); writes results/selection/
+make freeze           # already run: writes config/holdout_freeze.json once and refuses to overwrite it
 make gate-calibrate   # fixed-tolerance false-block rates (stand-in pair, kept for the record); writes results/gate/
 ```
 

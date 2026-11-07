@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -83,6 +83,9 @@ challengers: ## Out-of-fold probes on BioCLIP 2 and DINOv2 embeddings per fold s
 
 select-challenger: ## Choose the hold-out challenger by simulated gate pass rate on fold sites; writes results/selection/ and figures/
 	PYTHONPATH=src python -m cameratrap.report.selection
+
+freeze: ## Write and hash the hold-out freeze to config/holdout_freeze.json; refuses to overwrite one
+	PYTHONPATH=src python -m cameratrap.report.holdout_freeze
 
 gate-calibrate: ## Per-site tolerance false-block rates on fold sites; writes results/gate/ and figures/
 	PYTHONPATH=src python -m cameratrap.report.gate_calibration
