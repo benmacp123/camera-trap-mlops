@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-Status: Phase 3 in progress. The hold-out has been scored once under the freeze: the DINOv2 probe passed the gate and replaces BioCLIP 2 zero-shot as champion. The CNN control, reported only, is training.
+**Status: in progress.** On ten camera sites held back until the test was fixed, a small trained classifier beat an off-the-shelf model at all ten; see [Answer so far](#answer-so-far). A comparison CNN is training, and the per-site trust report and drift study are still to come.
 
 ## The question
 
