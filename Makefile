@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout track gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -86,6 +86,17 @@ select-challenger: ## Choose the hold-out challenger by simulated gate pass rate
 
 freeze: ## Write and hash the hold-out freeze to config/holdout_freeze.json; refuses to overwrite one
 	PYTHONPATH=src python -m cameratrap.report.holdout_freeze
+
+holdout-check: ## Check the freeze, its inputs and the caches, without fitting or scoring anything
+	PYTHONPATH=src python -m cameratrap.report.holdout --check
+
+holdout: ## One shot: score the frozen challenger on the hold-out and run the gate; writes results/holdout/ and figures/
+	PYTHONPATH=src python -m cameratrap.report.holdout
+
+# Both outputs are git-ignored and derived from committed results.
+track: ## Rebuild mlflow.db and mlruns/ from the committed results: runs, versions and aliases
+	rm -rf mlflow.db mlruns
+	PYTHONPATH=src python -m cameratrap.tracking.registry
 
 gate-calibrate: ## Per-site tolerance false-block rates on fold sites; writes results/gate/ and figures/
 	PYTHONPATH=src python -m cameratrap.report.gate_calibration

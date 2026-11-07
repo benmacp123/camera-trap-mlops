@@ -218,20 +218,20 @@ flowchart TB
 
     gate{{"Promotion gate<br>BCa site bootstrap, margin,<br>noise-aware per-site check"}}
 
+    mlflow[("MLflow registry<br>@champion, @challenger")]
+
     subgraph lifecycle ["Lifecycle (planned)"]
-        mlflow[("MLflow registry<br>@champion, @challenger")]
         report["Per-site trust report"]
         replay["Replay by date and site"]
         drift["Drift signals scored<br>against held-back labels"]
         review["Review queue<br>sampled sequences"]
-        mlflow -. "challenger" .-> gate
-        gate -. "promote or reject" .-> mlflow
         gate -.-> report
         mlflow -. "champion" .-> replay -.-> drift -.-> review
     end
 
-    arms -. "scores per site" .-> gate
-    arms -. "logged runs" .-> mlflow
+    baselines -- "scores per site" --> gate
+    baselines -- "logged runs" --> mlflow
+    gate -- "promote or reject" --> mlflow
     review -. "new labels" .-> arms
 
     subgraph aws ["AWS batch route (planned)"]
@@ -298,6 +298,24 @@ passes or fails, and a fail does not send another challenger in. Expect the
 score to fall from the fold sites' +7.2 points: it was the best of four, so
 it carries some selection luck (the winner's curse).
 
+`make holdout-check` runs every check (freeze hash, inputs, recipe, library
+versions, embeddings covering every frame) and stops before fitting or scoring
+anything. `make holdout` then fits the challenger on every fold-site frame,
+scores both arms on the ten sites, runs the gate and writes `results/holdout/`.
+It refuses to overwrite a result; to reproduce one, pass another `--out-dir`
+and compare. **The hold-out has not been scored yet.**
+
+## Tracking
+
+`make track` rebuilds a local MLflow store (`mlflow.db` and `mlruns/`, both
+git-ignored) from the committed results, so it needs no server or account.
+Every challenger becomes a run. Only the champion and the frozen challenger
+become versions of the `species-classifier` model, under the aliases
+`@champion` and `@challenger`. Once a hold-out result exists, its decision
+alone moves them: a pass moves `@champion` and keeps the old one as
+`@previous_champion`; a fail leaves `@champion` alone and tags the challenger
+as rejected. `mlflow ui --backend-store-uri sqlite:///mlflow.db` browses it.
+
 ## Reproducing
 
 Needs [uv](https://docs.astral.sh/uv/) and nothing else: no accounts or
@@ -322,6 +340,9 @@ make baselines        # zero-shot tables per fold site; writes results/baselines
 make challengers      # probes and kNN per fold site (about 12 min); writes results/challengers/
 make select-challenger # choose the hold-out challenger by simulated gate pass rate (about 8 min); writes results/selection/
 make freeze           # already run: writes config/holdout_freeze.json once and refuses to overwrite it
+make holdout-check    # check the freeze, inputs and caches; fits and scores nothing
+make holdout          # one shot: score the hold-out and run the gate; writes results/holdout/
+make track            # rebuild the MLflow runs and aliases from committed results
 make gate-calibrate   # fixed-tolerance false-block rates (stand-in pair, kept for the record); writes results/gate/
 ```
 
