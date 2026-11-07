@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-Status: Phase 3 in progress. The hold-out has been scored once under the freeze: the DINOv2 probe passed the gate and replaces BioCLIP 2 zero-shot as champion. The naive CNN control is next.
+Status: Phase 3 in progress. The hold-out has been scored once under the freeze: the DINOv2 probe passed the gate and replaces BioCLIP 2 zero-shot as champion. The CNN control, reported only, is training.
 
 ## The question
 
@@ -213,6 +213,23 @@ forward, ties going to the larger mean gain.
   the site's balanced accuracy. kNN still fails 30% of sets, on the
   margin, because that site drags the lower bound down.
 
+### The CNN control
+
+A control is an arm expected to lose, there to show what the frozen-embedding
+route is beating. This one fine-tunes every layer of an ImageNet EfficientNet-B0
+on the same crops and site folds as the probes, with the same class balancing,
+so a loss cannot be blamed on the imbalance. The recipe (`arms/cnn.py`) has no
+tuning step and was fixed before any fold was scored.
+
+It is reported only. The hold-out is spent, so the control is scored out of
+fold on the fold sites and never on a hold-out frame. It is logged as an MLflow
+run with no model version, so no alias can point at it whatever its result. Two
+limits apply to the comparison: the DINOv2 probe was selected on these same
+sites, so its score is slightly optimistic, and one training seed leaves the
+CNN's training noise unmeasured.
+
+The result is pending.
+
 ## How it works
 
 The components are below. Solid parts are built; dashed parts are
@@ -232,13 +249,13 @@ flowchart TB
         speciesnet["SpeciesNet<br>zero-shot, COL geofence"]
         bioclip["BioCLIP 2<br>zero-shot"]
         probe["Probes and kNN on<br>BioCLIP 2 and DINOv2"]
-        cnn["Naive CNN fine-tune<br>(control, planned)"]
+        cnn["EfficientNet-B0 fine-tune<br>(control, reported only)"]
     end
 
     crops --> speciesnet
     embeddings --> bioclip
     embeddings --> probe
-    crops -.-> cnn
+    crops --> cnn
 
     speciesnet --> baselines["Per-site scores<br>zero-shot baselines and challengers"]
     bioclip --> baselines
@@ -259,6 +276,7 @@ flowchart TB
 
     baselines -- "scores per site" --> gate
     baselines -- "logged runs" --> mlflow
+    cnn -- "run only, no version" --> mlflow
     gate -- "promote or reject" --> mlflow
     review -. "new labels" .-> arms
 
@@ -340,7 +358,8 @@ become versions of the `species-classifier` model, under the aliases
 `@champion` and `@challenger`. Once a hold-out result exists, its decision
 alone moves them: a pass moves `@champion` and keeps the old one as
 `@previous_champion`; a fail leaves `@champion` alone and tags the challenger
-as rejected. `mlflow ui --backend-store-uri sqlite:///mlflow.db` browses it.
+as rejected. The CNN control is a run with no version, so it can move nothing.
+`mlflow ui --backend-store-uri sqlite:///mlflow.db` browses it.
 
 ## Reproducing
 
@@ -368,6 +387,8 @@ make select-challenger # choose the hold-out challenger by simulated gate pass r
 make freeze           # already run: writes config/holdout_freeze.json once and refuses to overwrite it
 make holdout-check    # check the freeze, inputs and caches; fits and scores nothing
 make holdout          # one shot: score the hold-out and run the gate; writes results/holdout/
+make cnn-control      # optional: fine-tune the CNN control (about 14 h on CPU, resumes); writes its logits to results/control/
+make control          # report the control from its committed logits; writes results/control/ and figures/
 make track            # rebuild the MLflow runs and aliases from committed results
 make gate-calibrate   # fixed-tolerance false-block rates (stand-in pair, kept for the record); writes results/gate/
 ```

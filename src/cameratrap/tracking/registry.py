@@ -35,6 +35,8 @@ CHALLENGERS = Path("results/challengers")
 SELECTION = Path("results/selection/summary.json")
 HOLDOUT = Path("results/holdout")
 HOLDOUT_FILES = ("summary.json", "per_site.csv")
+CONTROL = Path("results/control")
+CONTROL_FILES = ("summary.json", "per_site.csv", "per_class.csv")
 
 
 def log_run(client, experiment_id, name, params, metrics, tags, files=()):
@@ -137,6 +139,42 @@ def arm_params(arm, arm_summary):
     return {"backbone": backbone, "method": method or "zero_shot"} | chosen
 
 
+def log_control(client, experiment_id, root):
+    """Log the CNN control as a run, if it has been reported.
+
+    It is deliberately only a run: with no model version, no alias can ever
+    point at it, whatever its result.
+
+    Args:
+        client: An ``MlflowClient``.
+        experiment_id: The experiment to log under.
+        root: The repository root, a ``pathlib.Path``.
+
+    Returns:
+        The run's ID, or ``None`` if there is no control result yet.
+    """
+    path = root / CONTROL / "summary.json"
+    if not path.exists():
+        return None
+    summary = json.loads(path.read_text())
+    metrics = {
+        f"{arm}_mean_site_balanced_accuracy": value
+        for arm, value in summary["mean_site_balanced_accuracy"].items()
+    }
+    for arm, verdict in summary["reference_verdicts"].items():
+        metrics[f"mean_gain_over_{arm}"] = verdict["mean_gain"]
+    recipe = summary["made_with"]["recipe"]
+    return log_run(
+        client,
+        experiment_id,
+        "cnn_control",
+        {"backbone": recipe["model_id"], "method": "full_fine_tune"},
+        metrics,
+        {"evaluated_on": "fold sites", "role": "control"},
+        [root / CONTROL / name for name in CONTROL_FILES],
+    )
+
+
 def sync(client, root, artifact_location):
     """Log every arm, register the two put forward, and apply any decision.
 
@@ -179,6 +217,7 @@ def sync(client, root, artifact_location):
         )
         for arm, entry in summary["arms"].items()
     }
+    log_control(client, experiment, root)
 
     client.create_registered_model(MODEL_NAME)
     champion, challenger = config["champion"], config["challenger"]

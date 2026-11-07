@@ -165,3 +165,50 @@ def test_the_head_is_attached_once_the_hold_out_has_run(client, repo):
     version = client.get_model_version_by_alias(registry.MODEL_NAME, "champion")
     files = {f.path for f in client.list_artifacts(version.run_id, "model")}
     assert files == {"model/card.json", "model/probe_head.npz"}
+
+
+def write_control(root, mean_gain):
+    """Write a CNN control report with the given gain.
+
+    Args:
+        root: The repository root.
+        mean_gain: Its mean gain over the champion.
+    """
+    folder = root / registry.CONTROL
+    folder.mkdir(parents=True)
+    verdict = {"would_pass": mean_gain > 0, "mean_gain": mean_gain}
+    summary = {
+        "mean_site_balanced_accuracy": {"cnn_control": 0.8},
+        "reference_verdicts": {"dinov2_probe": verdict},
+        "made_with": {"recipe": {"model_id": "timm/efficientnet_b0.ra_in1k"}},
+    }
+    (folder / "summary.json").write_text(json.dumps(summary))
+    for name in registry.CONTROL_FILES[1:]:
+        (folder / name).write_text("site\nS0\n")
+
+
+def test_a_winning_control_is_a_run_and_moves_nothing(client, repo):
+    """Even a control that beats the champion gets a run, no version and no alias."""
+    write_result(repo, promote=True)
+    aliases_without = run_sync(client, repo)
+    versions_without = len(client.search_model_versions("name='species-classifier'"))
+
+    uri = f"sqlite:///{repo.parent / 'second.db'}"
+    second = mlflow.MlflowClient(tracking_uri=uri, registry_uri=uri)
+    write_control(repo, mean_gain=0.2)
+    aliases_with = registry.sync(second, repo, (repo.parent / "mlruns2").as_uri())
+
+    assert aliases_with == aliases_without
+    versions = second.search_model_versions("name='species-classifier'")
+    assert len(versions) == versions_without
+    experiment = second.get_experiment_by_name(registry.EXPERIMENT).experiment_id
+    runs = second.search_runs([experiment], "tags.role = 'control'")
+    assert [run.info.run_name for run in runs] == ["cnn_control"]
+    assert runs[0].info.run_id not in {version.run_id for version in versions}
+
+
+def test_no_control_result_logs_no_control_run(client, repo):
+    """Before the control has run, the rebuild still works and logs no run for it."""
+    run_sync(client, repo)
+    experiment = client.get_experiment_by_name(registry.EXPERIMENT).experiment_id
+    assert not client.search_runs([experiment], "tags.role = 'control'")

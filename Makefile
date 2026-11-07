@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout track gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control track gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -92,6 +92,14 @@ holdout-check: ## Check the freeze, its inputs and the caches, without fitting o
 
 holdout: ## One shot: score the frozen challenger on the hold-out and run the gate; writes results/holdout/ and figures/
 	PYTHONPATH=src python -m cameratrap.report.holdout
+
+# The control is reported only and never touches the hold-out. Training needs
+# `make install-models` and the crop store, and resumes if stopped.
+cnn-control: ## Fine-tune EfficientNet-B0 out of fold by site (about 16 h on CPU); writes results/control/frame_logits.npz
+	PYTHONPATH=src python -m cameratrap.arms.cnn
+
+control: ## Report the CNN control from its committed logits; writes results/control/ and figures/
+	PYTHONPATH=src python -m cameratrap.report.control
 
 # Both outputs are git-ignored and derived from committed results.
 track: ## Rebuild mlflow.db and mlruns/ from the committed results: runs, versions and aliases
