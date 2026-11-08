@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control track gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control trust-report track gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -100,6 +100,9 @@ cnn-control: ## Fine-tune EfficientNet-B0 out of fold by site (about 16 h on CPU
 
 control: ## Report the CNN control from its committed logits; writes results/control/ and figures/
 	PYTHONPATH=src python -m cameratrap.report.control
+
+trust-report: ## Per-site trust report for the champion from committed predictions; writes results/trust/ and figures/
+	PYTHONPATH=src python -m cameratrap.report.trust
 
 # Both outputs are git-ignored and derived from committed results.
 track: ## Rebuild mlflow.db and mlruns/ from the committed results: runs, versions and aliases

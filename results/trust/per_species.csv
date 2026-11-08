@@ -1,0 +1,330 @@
+site,source,species,sequences,recall,mistaken_for,status
+A01,fold,black_agouti,20,0.95,salvins_curassow,ok
+A01,fold,collared_peccary,27,0.7407407407407407,white-lipped_peccary,ok
+A01,fold,lowland_tapir,9,1.0,,ok
+A01,fold,spixs_guan,13,0.8461538461538461,salvins_curassow,ok
+A02,holdout,black_agouti,90,0.9333333333333333,spotted_paca,ok
+A02,holdout,collared_peccary,5,0.6,black_agouti,weak
+A02,holdout,south_american_coati,3,1.0,,too few
+A02,holdout,southern_tamandua,32,0.9375,lowland_tapir,ok
+A02,holdout,spixs_guan,28,0.9285714285714286,black_agouti,ok
+A02,holdout,spotted_paca,3,1.0,,too few
+A03,holdout,black_agouti,1,1.0,,too few
+A03,holdout,collared_peccary,13,0.9230769230769231,white-lipped_peccary,ok
+A03,holdout,lowland_tapir,4,1.0,,too few
+A03,holdout,south_american_coati,21,0.9523809523809523,southern_tamandua,ok
+A03,holdout,southern_tamandua,3,1.0,,too few
+A03,holdout,spotted_paca,17,1.0,,ok
+A04,fold,south_american_coati,11,1.0,,ok
+A04,fold,southern_tamandua,6,0.8333333333333334,spotted_paca,ok
+A04,fold,spixs_guan,1,1.0,,too few
+A04,fold,spotted_paca,4,1.0,,too few
+A05,fold,black_agouti,8,0.875,white-lipped_peccary,ok
+A05,fold,collared_peccary,102,0.803921568627451,white-lipped_peccary,ok
+A05,fold,lowland_tapir,5,1.0,,ok
+A05,fold,salvins_curassow,2,1.0,,too few
+A05,fold,south_american_coati,16,1.0,,ok
+A05,fold,southern_tamandua,2,1.0,,too few
+A05,fold,spixs_guan,7,1.0,,ok
+A06,fold,black_agouti,74,0.972972972972973,collared_peccary,ok
+A06,fold,collared_peccary,32,0.8125,black_agouti,ok
+A06,fold,lowland_tapir,6,1.0,,ok
+A06,fold,salvins_curassow,22,1.0,,ok
+A06,fold,south_american_coati,10,1.0,,ok
+A06,fold,southern_tamandua,14,1.0,,ok
+A06,fold,spixs_guan,23,0.9565217391304348,salvins_curassow,ok
+A06,fold,spotted_paca,12,1.0,,ok
+A06,fold,white-lipped_peccary,31,0.9032258064516129,collared_peccary,ok
+A07,holdout,black_agouti,3,1.0,,too few
+A07,holdout,collared_peccary,10,0.9,white-lipped_peccary,ok
+A07,holdout,salvins_curassow,22,0.9545454545454546,spixs_guan,ok
+A07,holdout,south_american_coati,2,1.0,,too few
+A07,holdout,southern_tamandua,1,1.0,,too few
+A07,holdout,spixs_guan,6,1.0,,ok
+A07,holdout,spotted_paca,5,1.0,,ok
+A08,fold,black_agouti,74,0.972972972972973,south_american_coati,ok
+A08,fold,collared_peccary,3,0.6666666666666667,black_agouti,too few
+A08,fold,lowland_tapir,2,1.0,,too few
+A08,fold,salvins_curassow,2,1.0,,too few
+A08,fold,south_american_coati,5,1.0,,ok
+A08,fold,southern_tamandua,8,0.875,spotted_paca,ok
+A08,fold,spotted_paca,49,1.0,,ok
+A08,fold,white-lipped_peccary,2,1.0,,too few
+A09,fold,black_agouti,14,0.9285714285714286,collared_peccary,ok
+A09,fold,collared_peccary,19,1.0,,ok
+A09,fold,south_american_coati,16,1.0,,ok
+A09,fold,southern_tamandua,16,1.0,,ok
+A09,fold,spixs_guan,13,1.0,,ok
+A09,fold,spotted_paca,1,1.0,,too few
+A09,fold,white-lipped_peccary,4,0.25,collared_peccary,too few
+M00,fold,black_agouti,45,0.9555555555555556,spotted_paca,ok
+M00,fold,collared_peccary,123,0.9512195121951219,black_agouti,ok
+M00,fold,lowland_tapir,3,1.0,,too few
+M00,fold,south_american_coati,11,1.0,,ok
+M00,fold,southern_tamandua,8,1.0,,ok
+M00,fold,spixs_guan,15,1.0,,ok
+M00,fold,spotted_paca,10,1.0,,ok
+M00,fold,white-lipped_peccary,16,0.8125,collared_peccary,ok
+M01,fold,black_agouti,151,0.9205298013245033,spotted_paca,ok
+M01,fold,collared_peccary,163,0.9079754601226994,white-lipped_peccary,ok
+M01,fold,lowland_tapir,1,1.0,,too few
+M01,fold,south_american_coati,5,1.0,,ok
+M01,fold,southern_tamandua,8,0.875,spotted_paca,ok
+M01,fold,spixs_guan,1,1.0,,too few
+M01,fold,spotted_paca,1,1.0,,too few
+M01,fold,white-lipped_peccary,1,0.0,collared_peccary,too few
+M02,fold,black_agouti,158,0.9367088607594937,collared_peccary,ok
+M02,fold,collared_peccary,77,0.8701298701298701,white-lipped_peccary,ok
+M02,fold,lowland_tapir,8,1.0,,ok
+M02,fold,south_american_coati,5,1.0,,ok
+M02,fold,southern_tamandua,19,1.0,,ok
+M02,fold,spixs_guan,4,1.0,,too few
+M02,fold,white-lipped_peccary,19,0.6842105263157895,collared_peccary,weak
+M03,fold,black_agouti,28,0.9285714285714286,collared_peccary,ok
+M03,fold,collared_peccary,53,0.8490566037735849,white-lipped_peccary,ok
+M03,fold,south_american_coati,12,0.9166666666666666,spixs_guan,ok
+M03,fold,southern_tamandua,18,0.8333333333333334,spotted_paca,ok
+M03,fold,white-lipped_peccary,10,0.7,collared_peccary,ok
+M04,fold,black_agouti,460,0.9260869565217391,collared_peccary,ok
+M04,fold,collared_peccary,355,0.8901408450704226,white-lipped_peccary,ok
+M04,fold,lowland_tapir,2,1.0,,too few
+M04,fold,salvins_curassow,1,0.0,spixs_guan,too few
+M04,fold,south_american_coati,39,0.9743589743589743,southern_tamandua,ok
+M04,fold,southern_tamandua,13,1.0,,ok
+M04,fold,spixs_guan,12,1.0,,ok
+M04,fold,spotted_paca,1,1.0,,too few
+M04,fold,white-lipped_peccary,51,0.7058823529411764,collared_peccary,ok
+M05,fold,black_agouti,50,0.92,spixs_guan,ok
+M05,fold,collared_peccary,170,0.8941176470588236,south_american_coati,ok
+M05,fold,south_american_coati,18,1.0,,ok
+M05,fold,southern_tamandua,5,1.0,,ok
+M05,fold,spixs_guan,3,0.33333333333333337,salvins_curassow,too few
+M05,fold,spotted_paca,1,1.0,,too few
+M05,fold,white-lipped_peccary,5,0.6,collared_peccary,weak
+N00,holdout,black_agouti,66,0.8787878787878788,south_american_coati,ok
+N00,holdout,collared_peccary,116,0.7672413793103449,white-lipped_peccary,ok
+N00,holdout,south_american_coati,18,0.9444444444444444,spixs_guan,ok
+N00,holdout,southern_tamandua,10,0.8,spotted_paca,ok
+N00,holdout,spixs_guan,20,0.9,south_american_coati,ok
+N00,holdout,spotted_paca,37,1.0,,ok
+N01,fold,black_agouti,1,1.0,,too few
+N01,fold,collared_peccary,1,1.0,,too few
+N01,fold,lowland_tapir,1,1.0,,too few
+N01,fold,salvins_curassow,5,1.0,,ok
+N01,fold,south_american_coati,5,0.8,collared_peccary,ok
+N01,fold,southern_tamandua,3,1.0,,too few
+N01,fold,spotted_paca,10,1.0,,ok
+N02,fold,black_agouti,1,1.0,,too few
+N02,fold,collared_peccary,59,0.8135593220338984,black_agouti,ok
+N02,fold,lowland_tapir,62,0.6129032258064516,spotted_paca,weak
+N02,fold,salvins_curassow,4,0.75,black_agouti,too few
+N02,fold,south_american_coati,2,0.5,black_agouti,too few
+N02,fold,southern_tamandua,9,0.8888888888888888,spotted_paca,ok
+N02,fold,spixs_guan,1,1.0,,too few
+N02,fold,spotted_paca,10,1.0,,ok
+N02,fold,white-lipped_peccary,1,0.0,collared_peccary,too few
+N03,fold,black_agouti,46,0.9565217391304348,southern_tamandua,ok
+N03,fold,collared_peccary,9,0.8888888888888888,white-lipped_peccary,ok
+N03,fold,south_american_coati,17,0.9411764705882353,collared_peccary,ok
+N03,fold,southern_tamandua,6,1.0,,ok
+N03,fold,spixs_guan,7,1.0,,ok
+N03,fold,spotted_paca,5,1.0,,ok
+N04,fold,black_agouti,16,0.9375,south_american_coati,ok
+N04,fold,collared_peccary,7,0.8571428571428572,white-lipped_peccary,ok
+N04,fold,lowland_tapir,13,1.0,,ok
+N04,fold,salvins_curassow,15,1.0,,ok
+N04,fold,south_american_coati,5,1.0,,ok
+N04,fold,southern_tamandua,8,1.0,,ok
+N04,fold,spixs_guan,5,1.0,,ok
+N04,fold,spotted_paca,155,0.9870967741935484,southern_tamandua,ok
+N05,fold,black_agouti,10,1.0,,ok
+N05,fold,collared_peccary,3,1.0,,too few
+N05,fold,lowland_tapir,2,0.5,white-lipped_peccary,too few
+N05,fold,salvins_curassow,2,1.0,,too few
+N05,fold,south_american_coati,5,0.8,spixs_guan,ok
+N05,fold,southern_tamandua,3,1.0,,too few
+N05,fold,spixs_guan,3,1.0,,too few
+N05,fold,spotted_paca,1,1.0,,too few
+N05,fold,white-lipped_peccary,16,0.875,black_agouti,ok
+N06,fold,black_agouti,10,0.8,southern_tamandua,ok
+N06,fold,collared_peccary,2,1.0,,too few
+N06,fold,lowland_tapir,1,1.0,,too few
+N06,fold,salvins_curassow,19,1.0,,ok
+N06,fold,south_american_coati,13,1.0,,ok
+N06,fold,southern_tamandua,2,1.0,,too few
+N06,fold,spixs_guan,2,1.0,,too few
+N06,fold,spotted_paca,1,1.0,,too few
+N07,fold,black_agouti,89,0.9662921348314607,white-lipped_peccary,ok
+N07,fold,collared_peccary,210,0.9333333333333333,white-lipped_peccary,ok
+N07,fold,south_american_coati,15,0.9333333333333333,collared_peccary,ok
+N07,fold,southern_tamandua,5,1.0,,ok
+N07,fold,spixs_guan,1,1.0,,too few
+N07,fold,spotted_paca,27,1.0,,ok
+N07,fold,white-lipped_peccary,17,0.8823529411764706,spixs_guan,ok
+N08,fold,black_agouti,129,0.7829457364341086,collared_peccary,ok
+N08,fold,collared_peccary,25,0.8,white-lipped_peccary,ok
+N08,fold,south_american_coati,16,0.9375,black_agouti,ok
+N08,fold,southern_tamandua,2,0.5,south_american_coati,too few
+N08,fold,spixs_guan,14,0.7857142857142857,salvins_curassow,ok
+N08,fold,spotted_paca,26,0.9615384615384616,southern_tamandua,ok
+N08,fold,white-lipped_peccary,4,0.75,collared_peccary,too few
+N09,fold,black_agouti,46,0.9782608695652174,spixs_guan,ok
+N09,fold,collared_peccary,15,0.5333333333333333,white-lipped_peccary,weak
+N09,fold,lowland_tapir,1,1.0,,too few
+N09,fold,salvins_curassow,4,0.75,black_agouti,too few
+N09,fold,south_american_coati,4,1.0,,too few
+N09,fold,spotted_paca,15,1.0,,ok
+N09,fold,white-lipped_peccary,21,0.8095238095238095,collared_peccary,ok
+N10,fold,black_agouti,14,1.0,,ok
+N10,fold,collared_peccary,8,0.875,white-lipped_peccary,ok
+N10,fold,lowland_tapir,12,1.0,,ok
+N10,fold,salvins_curassow,6,1.0,,ok
+N10,fold,south_american_coati,7,1.0,,ok
+N10,fold,southern_tamandua,11,1.0,,ok
+N10,fold,spotted_paca,13,1.0,,ok
+N11,fold,black_agouti,57,0.9122807017543859,white-lipped_peccary,ok
+N11,fold,collared_peccary,89,0.9101123595505618,black_agouti,ok
+N11,fold,south_american_coati,18,0.8888888888888888,southern_tamandua,ok
+N11,fold,southern_tamandua,4,1.0,,too few
+N11,fold,spixs_guan,2,0.5,south_american_coati,too few
+N12,fold,black_agouti,7,0.5714285714285714,spotted_paca,weak
+N12,fold,collared_peccary,5,1.0,,ok
+N12,fold,salvins_curassow,33,0.8484848484848485,black_agouti,ok
+N12,fold,south_american_coati,6,1.0,,ok
+N12,fold,southern_tamandua,1,1.0,,too few
+N12,fold,spixs_guan,1,1.0,,too few
+N12,fold,spotted_paca,81,0.9506172839506173,southern_tamandua,ok
+N13,holdout,black_agouti,130,0.9692307692307692,white-lipped_peccary,ok
+N13,holdout,collared_peccary,43,0.9069767441860466,white-lipped_peccary,ok
+N13,holdout,south_american_coati,20,1.0,,ok
+N13,holdout,southern_tamandua,2,1.0,,too few
+N13,holdout,spixs_guan,25,0.92,salvins_curassow,ok
+N13,holdout,spotted_paca,3,1.0,,too few
+N13,holdout,white-lipped_peccary,31,0.8387096774193549,collared_peccary,ok
+N14,holdout,black_agouti,252,0.9285714285714286,collared_peccary,ok
+N14,holdout,collared_peccary,267,0.9026217228464419,white-lipped_peccary,ok
+N14,holdout,lowland_tapir,2,0.5,spotted_paca,too few
+N14,holdout,south_american_coati,10,0.9,southern_tamandua,ok
+N14,holdout,southern_tamandua,1,1.0,,too few
+N14,holdout,spixs_guan,7,1.0,,ok
+N14,holdout,spotted_paca,4,1.0,,too few
+N14,holdout,white-lipped_peccary,12,1.0,,ok
+N15,fold,black_agouti,30,0.9333333333333333,collared_peccary,ok
+N15,fold,collared_peccary,8,0.875,white-lipped_peccary,ok
+N15,fold,lowland_tapir,1,1.0,,too few
+N15,fold,salvins_curassow,2,0.5,black_agouti,too few
+N15,fold,south_american_coati,7,1.0,,ok
+N15,fold,southern_tamandua,4,0.75,lowland_tapir,too few
+N15,fold,spixs_guan,3,1.0,,too few
+N15,fold,spotted_paca,23,0.8695652173913043,lowland_tapir,ok
+N16,fold,black_agouti,22,1.0,,ok
+N16,fold,collared_peccary,4,0.75,south_american_coati,too few
+N16,fold,south_american_coati,2,1.0,,too few
+N16,fold,spotted_paca,4,1.0,,too few
+N17,fold,black_agouti,23,0.9565217391304348,spotted_paca,ok
+N17,fold,collared_peccary,7,0.8571428571428572,white-lipped_peccary,ok
+N17,fold,lowland_tapir,20,0.95,white-lipped_peccary,ok
+N17,fold,salvins_curassow,1,1.0,,too few
+N17,fold,southern_tamandua,7,0.8571428571428572,spixs_guan,ok
+N17,fold,spixs_guan,17,1.0,,ok
+N17,fold,spotted_paca,1,1.0,,too few
+N19,holdout,black_agouti,29,0.9655172413793104,spotted_paca,ok
+N19,holdout,collared_peccary,21,0.7142857142857143,white-lipped_peccary,ok
+N19,holdout,lowland_tapir,11,0.9090909090909091,spotted_paca,ok
+N19,holdout,south_american_coati,3,1.0,,too few
+N19,holdout,southern_tamandua,10,1.0,,ok
+N19,holdout,spixs_guan,5,1.0,,ok
+N19,holdout,spotted_paca,31,0.9032258064516129,black_agouti,ok
+N20,fold,black_agouti,10,0.5,collared_peccary,weak
+N20,fold,collared_peccary,102,0.9803921568627451,white-lipped_peccary,ok
+N20,fold,lowland_tapir,13,0.8461538461538461,collared_peccary,ok
+N20,fold,south_american_coati,3,0.6666666666666667,black_agouti,too few
+N20,fold,southern_tamandua,2,1.0,,too few
+N20,fold,spixs_guan,2,1.0,,too few
+N20,fold,spotted_paca,10,0.8,black_agouti,ok
+N20,fold,white-lipped_peccary,15,0.9333333333333333,collared_peccary,ok
+N21,fold,black_agouti,89,0.9662921348314607,spixs_guan,ok
+N21,fold,collared_peccary,12,0.9166666666666666,white-lipped_peccary,ok
+N21,fold,south_american_coati,5,1.0,,ok
+N21,fold,southern_tamandua,6,1.0,,ok
+N21,fold,spixs_guan,4,0.75,salvins_curassow,too few
+N21,fold,white-lipped_peccary,1,1.0,,too few
+N22,fold,black_agouti,127,0.8425196850393701,collared_peccary,ok
+N22,fold,collared_peccary,37,0.8378378378378378,white-lipped_peccary,ok
+N22,fold,south_american_coati,13,1.0,,ok
+N22,fold,spixs_guan,10,1.0,,ok
+N22,fold,spotted_paca,1,0.0,southern_tamandua,too few
+N23,holdout,black_agouti,76,0.9736842105263158,spotted_paca,ok
+N23,holdout,collared_peccary,2,1.0,,too few
+N23,holdout,lowland_tapir,3,1.0,,too few
+N23,holdout,salvins_curassow,23,1.0,,ok
+N23,holdout,south_american_coati,3,1.0,,too few
+N23,holdout,southern_tamandua,1,1.0,,too few
+N23,holdout,spotted_paca,54,1.0,,ok
+N24,fold,black_agouti,43,0.9767441860465116,collared_peccary,ok
+N24,fold,collared_peccary,4,0.5,white-lipped_peccary,too few
+N24,fold,lowland_tapir,4,1.0,,too few
+N24,fold,salvins_curassow,3,0.33333333333333337,spixs_guan,too few
+N24,fold,south_american_coati,3,1.0,,too few
+N24,fold,southern_tamandua,5,1.0,,ok
+N24,fold,spixs_guan,20,1.0,,ok
+N24,fold,spotted_paca,3,1.0,,too few
+N25,fold,black_agouti,105,0.9809523809523809,south_american_coati,ok
+N25,fold,collared_peccary,466,0.8648068669527897,white-lipped_peccary,ok
+N25,fold,south_american_coati,8,1.0,,ok
+N25,fold,southern_tamandua,7,1.0,,ok
+N25,fold,spixs_guan,1,1.0,,too few
+N25,fold,spotted_paca,13,1.0,,ok
+N25,fold,white-lipped_peccary,35,0.7428571428571429,collared_peccary,ok
+N26,fold,black_agouti,33,0.9393939393939394,white-lipped_peccary,ok
+N26,fold,collared_peccary,19,0.9473684210526316,white-lipped_peccary,ok
+N26,fold,lowland_tapir,8,1.0,,ok
+N26,fold,salvins_curassow,4,1.0,,too few
+N26,fold,south_american_coati,1,1.0,,too few
+N26,fold,southern_tamandua,9,1.0,,ok
+N26,fold,spixs_guan,2,1.0,,too few
+N26,fold,spotted_paca,15,0.8666666666666667,southern_tamandua,ok
+N27,fold,black_agouti,243,0.9917695473251029,salvins_curassow,ok
+N27,fold,collared_peccary,10,0.7,south_american_coati,ok
+N27,fold,lowland_tapir,1,1.0,,too few
+N27,fold,salvins_curassow,26,0.8846153846153846,black_agouti,ok
+N27,fold,south_american_coati,89,1.0,,ok
+N27,fold,southern_tamandua,5,1.0,,ok
+N27,fold,spixs_guan,18,0.8333333333333334,black_agouti,ok
+N27,fold,spotted_paca,15,1.0,,ok
+N29,fold,black_agouti,78,0.9615384615384616,collared_peccary,ok
+N29,fold,collared_peccary,424,0.8820754716981132,white-lipped_peccary,ok
+N29,fold,lowland_tapir,18,0.9444444444444444,spotted_paca,ok
+N29,fold,salvins_curassow,44,1.0,,ok
+N29,fold,south_american_coati,5,1.0,,ok
+N29,fold,spixs_guan,5,1.0,,ok
+N29,fold,spotted_paca,410,0.9780487804878049,southern_tamandua,ok
+N29,fold,white-lipped_peccary,43,0.41860465116279066,collared_peccary,weak
+N30,fold,black_agouti,25,1.0,,ok
+N30,fold,collared_peccary,26,0.8846153846153846,white-lipped_peccary,ok
+N30,fold,lowland_tapir,7,1.0,,ok
+N30,fold,southern_tamandua,3,1.0,,too few
+N30,fold,spixs_guan,2,1.0,,too few
+N30,fold,spotted_paca,9,1.0,,ok
+N31,holdout,black_agouti,76,0.9210526315789473,spotted_paca,ok
+N31,holdout,collared_peccary,3,1.0,,too few
+N31,holdout,salvins_curassow,3,1.0,,too few
+N31,holdout,south_american_coati,5,1.0,,ok
+N31,holdout,southern_tamandua,8,1.0,,ok
+N31,holdout,spixs_guan,2,0.5,salvins_curassow,too few
+N32,fold,salvins_curassow,1,1.0,,too few
+N33,holdout,black_agouti,45,1.0,,ok
+N33,holdout,collared_peccary,11,0.7272727272727273,black_agouti,ok
+N33,holdout,south_american_coati,2,1.0,,too few
+N33,holdout,southern_tamandua,5,1.0,,ok
+N33,holdout,spixs_guan,4,0.75,collared_peccary,too few
+N33,holdout,spotted_paca,18,1.0,,ok
+N34,fold,black_agouti,51,0.9411764705882353,south_american_coati,ok
+N34,fold,collared_peccary,34,0.7941176470588236,white-lipped_peccary,ok
+N34,fold,south_american_coati,8,1.0,,ok
+N34,fold,southern_tamandua,18,0.9444444444444444,spotted_paca,ok
+N36,fold,salvins_curassow,10,1.0,,ok
+N36,fold,south_american_coati,1,1.0,,too few
+N36,fold,southern_tamandua,1,0.0,lowland_tapir,too few
+N36,fold,spixs_guan,1,1.0,,too few
+N36,fold,spotted_paca,11,0.9090909090909091,southern_tamandua,ok

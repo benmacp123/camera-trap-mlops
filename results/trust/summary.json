@@ -1,0 +1,60 @@
+{
+  "champion": "dinov2_probe",
+  "previous_champion": "bioclip2",
+  "settings": {
+    "thresholds": [
+      0.0,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      0.95,
+      0.98,
+      0.99
+    ],
+    "target_residual_error": 0.05,
+    "weak_recall": 0.7,
+    "min_species_sequences": 5,
+    "bootstrap_resamples": 2000,
+    "confidence": 0.95,
+    "seed": 0
+  },
+  "family_alpha": 0.05,
+  "sites": {
+    "fold": 39,
+    "holdout": 10
+  },
+  "suggested_threshold": 0.5,
+  "at_suggested_threshold": {
+    "fold": {
+      "source": "fold",
+      "threshold": 0.5,
+      "sequences": 7590,
+      "review_share": 0.08985507246376812,
+      "residual_error": 0.04084321475625823,
+      "accepted_error": 0.04487550665894615
+    },
+    "holdout": {
+      "source": "holdout",
+      "threshold": 0.5,
+      "sequences": 1799,
+      "review_share": 0.06614785992217898,
+      "residual_error": 0.0405780989438577,
+      "accepted_error": 0.04345238095238095
+    }
+  },
+  "holdout_mean_balanced_accuracy": 0.9331928454736561,
+  "status_counts": {
+    "no regression found": 35,
+    "too little data to judge": 14
+  },
+  "flagged_sites": [],
+  "weak_species_cells": 8,
+  "weak_by_species": {
+    "black_agouti": 2,
+    "collared_peccary": 2,
+    "lowland_tapir": 1,
+    "white-lipped_peccary": 3
+  }
+}

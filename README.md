@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-**Status: in progress.** On ten camera sites held back until the test was fixed, a small trained classifier beat an off-the-shelf model at all ten; see [Answer so far](#answer-so-far). A fully fine-tuned CNN, run as a control, beat the off-the-shelf model but not the simpler trained one. The per-site trust report and drift study are still to come.
+**Status: in progress.** On ten camera sites held back until the test was fixed, a small trained classifier beat an off-the-shelf model at all ten; see [Answer so far](#answer-so-far). A fully fine-tuned CNN, run as a control, beat the off-the-shelf model but not the simpler trained one. A per-site trust report says how much review a confidence threshold buys; the drift study is still to come.
 
 ## The question
 
@@ -250,6 +250,43 @@ BioCLIP 2 zero-shot. The gate is run against both on the 33 sites with at least
   against 88%), so it learnt to favour the common one of the two.
 - Per-site and per-class tables are in `results/control/`.
 
+### The trust report
+
+The trust report (`make trust-report`, written to
+`results/trust/trust_report.md`) is a per-site audit of the champion, the
+DINOv2 probe, for someone deciding how far to trust its labels. It is
+retrospective: it covers sites that have labels and gives no accuracy for a new,
+unlabelled site, which is the drift study's question. It covers all 49 sites:
+the 39 fold sites, scored out of fold but optimistic because the probe was
+chosen there, and the 10 hold-out sites, scored once by the frozen model. Its
+rules were written into the plan before any of its numbers were computed.
+
+**Review budget.** A sequence whose top class probability reaches a threshold
+is accepted without review, and the rest go to a reviewer, who is assumed to
+correct them. The suggested threshold is the lowest whose residual error (wrong
+and unreviewed, over all sequences) is at most 5% on the fold sites, chosen
+there only. That is 0.5, and on the hold-out sites it sends 6.6% of sequences to
+review and leaves 4.1% wrong, against 7.8% with no review. A stricter 0.7 sends
+17.8% to review and leaves 1.2% wrong. The probabilities come from a
+class-balanced probe and are not calibrated, so the threshold is read off this
+table rather than as "70% sure".
+
+![Review share against residual error at each threshold](figures/trust_review_budget.png)
+
+- **Regressions.** No site is worse than under BioCLIP 2 zero-shot (Holm over
+  49 sites, alpha 0.05). Fourteen sites, three of them hold-out sites, are
+  labelled "too little data to judge": the two models disagree on too few
+  sequences there (nine or fewer) for any drop to be detectable, so they are
+  unchecked, not passed, and belong with a specialist reviewer.
+- **Weak species.** Eight site-species cells have recall below 70% with at
+  least five sequences. Three are white-lipped peccary called collared peccary,
+  the confusion that also sank the CNN control; N29 is the worst, at 42% of 43
+  sequences.
+- The per-site accuracy intervals resample sequences as if independent, which
+  they are not at one site, so they are too narrow.
+- Tables (per site, per site and species, per threshold) are in
+  `results/trust/`.
+
 ## How it works
 
 The components are below. Solid parts are built; dashed parts are
@@ -285,16 +322,17 @@ flowchart TB
 
     mlflow[("MLflow registry<br>@champion, @challenger")]
 
+    report["Per-site trust report<br>review budget, weak species,<br>Holm regression flags"]
+
     subgraph lifecycle ["Lifecycle (planned)"]
-        report["Per-site trust report"]
         replay["Replay by date and site"]
         drift["Drift signals scored<br>against held-back labels"]
         review["Review queue<br>sampled sequences"]
-        gate -.-> report
         mlflow -. "champion" .-> replay -.-> drift -.-> review
     end
 
     baselines -- "scores per site" --> gate
+    baselines -- "champion's predictions" --> report
     baselines -- "logged runs" --> mlflow
     cnn -- "run only, no version" --> mlflow
     gate -- "promote or reject" --> mlflow
@@ -409,6 +447,7 @@ make holdout-check    # check the freeze, inputs and caches; fits and scores not
 make holdout          # one shot: score the hold-out and run the gate; writes results/holdout/
 make cnn-control      # optional: fine-tune the CNN control (about 14 h on CPU, resumes); writes its logits to results/control/
 make control          # report the control from its committed logits; writes results/control/ and figures/
+make trust-report     # per-site trust report for the champion (about 3 min); writes results/trust/ and figures/
 make track            # rebuild the MLflow runs and aliases from committed results
 make gate-calibrate   # fixed-tolerance false-block rates (stand-in pair, kept for the record); writes results/gate/
 ```
