@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-**Status: in progress.** On ten camera sites held back until the test was fixed, a small trained classifier beat an off-the-shelf model at all ten; see [Answer so far](#answer-so-far). A comparison CNN is training, and the per-site trust report and drift study are still to come.
+**Status: in progress.** On ten camera sites held back until the test was fixed, a small trained classifier beat an off-the-shelf model at all ten; see [Answer so far](#answer-so-far). A fully fine-tuned CNN, run as a control, beat the off-the-shelf model but not the simpler trained one. The per-site trust report and drift study are still to come.
 
 ## The question
 
@@ -228,7 +228,27 @@ limits apply to the comparison: the DINOv2 probe was selected on these same
 sites, so its score is slightly optimistic, and one training seed leaves the
 CNN's training noise unmeasured.
 
-The result is pending.
+**Result:** the control lands between the two, closer to the probe. Scored out of fold on 7,590 sequences from 38 fold sites, its mean
+site balanced accuracy is 88.5%, against 90.0% for the DINOv2 probe and 83.2% for
+BioCLIP 2 zero-shot. The gate is run against both on the 33 sites with at least
+49 sequences, as a reference only, since a control cannot be promoted:
+
+| CNN control against | Mean gain (points) | 95% BCa interval | Sites ahead | Flagged drops | Gate |
+| --- | --- | --- | --- | --- | --- |
+| DINOv2 probe | −2.2 | −4.3 to −0.7 | 9 of 33 | A06, N25 | would fail |
+| BioCLIP 2 zero-shot | +5.0 | +2.0 to +7.1 | 28 of 33 | none | would pass |
+
+![CNN control minus each other arm, by fold site](figures/control_gain.png)
+
+- Fine-tuning a whole network beats the zero-shot model, but a linear probe on
+  frozen DINOv2 embeddings does better still, at a fraction of the cost: the
+  probe trains in seconds, while the CNN took about 14 hours on CPU.
+- Most of the CNN's loss is one confusion: it called 141 of 292 white-lipped
+  peccary sequences collared peccary (recall 47%, against 72% for the probe).
+  A06 and N25, the two flagged sites, are among those with the most
+  white-lipped peccaries. The CNN does best on collared peccary itself (93%
+  against 88%), so it learnt to favour the common one of the two.
+- Per-site and per-class tables are in `results/control/`.
 
 ## How it works
 

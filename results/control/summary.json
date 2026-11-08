@@ -1,0 +1,74 @@
+{
+  "role": "control: reported only, cannot move an alias",
+  "scope": "fold sites only, out of fold; hold-out neither fitted nor scored",
+  "frames": 20991,
+  "sequences": 7590,
+  "sites_scored": 38,
+  "mean_site_balanced_accuracy": {
+    "dinov2_probe": 0.9003472585613873,
+    "bioclip2": 0.8316276518537904,
+    "cnn_control": 0.8847120558984688
+  },
+  "reference_verdicts": {
+    "dinov2_probe": {
+      "would_pass": false,
+      "sites": 33,
+      "mean_gain": -0.022269772483505656,
+      "interval": [
+        -0.04250878713698613,
+        -0.006646989950605177
+      ],
+      "sites_ahead": 9,
+      "worst_site_gain": -0.1685393258426966,
+      "per_site_cutoff": 0.0015151515151515152,
+      "regressions": [
+        "A06",
+        "N25"
+      ],
+      "reasons": [
+        "mean gain -0.022 is not above +0.000",
+        "lower bound -0.043 does not clear the margin -0.010",
+        "2 group(s) drop by more than chance explains (p < 0.0015): A06, N25"
+      ]
+    },
+    "bioclip2": {
+      "would_pass": true,
+      "sites": 33,
+      "mean_gain": 0.05005081971719651,
+      "interval": [
+        0.0198110124032873,
+        0.07149988102845484
+      ],
+      "sites_ahead": 28,
+      "worst_site_gain": -0.1963171036204744,
+      "per_site_cutoff": 0.0015151515151515152,
+      "regressions": [],
+      "reasons": []
+    }
+  },
+  "made_with": {
+    "index_sha256": "f8d3a53e38a4e757d36ba62d8231292e83a2776a948f0a7d401dd2386b96cfa2",
+    "library": "timm 1.0.30",
+    "recipe": {
+      "batch_size": 32,
+      "epochs": 15,
+      "input_size": 224,
+      "learning_rate": 0.0003,
+      "loss": "cross-entropy, class-balanced as the probe",
+      "model_id": "timm/efficientnet_b0.ra_in1k",
+      "optimiser": "AdamW",
+      "pretrained": "ImageNet; every layer trainable",
+      "schedule": "cosine, stepped per batch",
+      "score_crop_pct": 1.0,
+      "seed": 20261107,
+      "train_crop_scale": [
+        0.5,
+        1.0
+      ],
+      "weight_decay": 0.01
+    },
+    "revision": "1b5383e5f79cc0f7fc067e372f8f26a5fa73f26a",
+    "threads": 8,
+    "torch": "2.14.1+cpu"
+  }
+}
