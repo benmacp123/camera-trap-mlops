@@ -1,0 +1,86 @@
+{
+  "champion": "dinov2_probe",
+  "settings": {
+    "knn_k": 10,
+    "reference_size": 2000,
+    "min_site_sequences": 20,
+    "min_half_sequences": 20,
+    "bootstrap_resamples": 2000,
+    "confidence": 0.95,
+    "seed": 0
+  },
+  "primary_signal": "atc",
+  "sequences": 9389,
+  "sites_scored": {
+    "fold": 38,
+    "holdout": 10
+  },
+  "atc_thresholds": {
+    "fold0": 0.488130640281664,
+    "fold1": 0.5038527872917733,
+    "fold2": 0.4915687706995897,
+    "fold3": 0.5003263078065284,
+    "fold4": 0.49856036631248724,
+    "holdout": 0.4968371420617057
+  },
+  "primary": {
+    "fold": {
+      "signal": "atc",
+      "expected_sign": 1,
+      "rho": 0.7647187568395709,
+      "low": 0.5533257169306889,
+      "high": 0.8945601675013191,
+      "n": 38,
+      "mae": 0.027902324276145595,
+      "bias": -0.0053888472037636765,
+      "baseline_mae": 0.03892893385541213,
+      "improvement": 0.01102660957926654,
+      "improvement_low": -0.003130346090147475,
+      "improvement_high": 0.02592634337958251
+    },
+    "holdout": {
+      "signal": "atc",
+      "expected_sign": 1,
+      "rho": 0.9151515151515152,
+      "low": 0.6470588235294118,
+      "high": 1.0,
+      "n": 10,
+      "mae": 0.020659687899683622,
+      "bias": 0.01706451069836832,
+      "baseline_mae": 0.03198935773954931,
+      "improvement": 0.011329669839865686,
+      "improvement_low": -0.004764420947408036,
+      "improvement_high": 0.027190346302477755
+    }
+  },
+  "time_test": {
+    "fold": {
+      "sites": 34,
+      "observed_sd": 0.07399527285098137,
+      "expected_sd_no_change": 0.048033276537838926,
+      "ratio": 1.5405002153598766
+    },
+    "holdout": {
+      "sites": 10,
+      "observed_sd": 0.04714977799487179,
+      "expected_sd_no_change": 0.04348442217440246,
+      "ratio": 1.084291238958373
+    }
+  },
+  "cache": {
+    "backbone": "dinov2",
+    "crop_jpeg": {
+      "quality": 95,
+      "subsampling": 0
+    },
+    "crop_max_side": 448,
+    "index": "data/manifest/orinoquia_crops.csv",
+    "index_sha256": "f8d3a53e38a4e757d36ba62d8231292e83a2776a948f0a7d401dd2386b96cfa2",
+    "input_size": 224,
+    "library": "timm 1.0.30",
+    "model_id": "timm/vit_base_patch14_dinov2.lvd142m",
+    "normalised": "l2",
+    "revision": "4685c99dabffe5affac90bd99dbffd25801ae58d",
+    "torch": "2.14.1+cpu"
+  }
+}

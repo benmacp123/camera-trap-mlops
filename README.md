@@ -1,6 +1,6 @@
 # Camera-Trap MLOps
 
-**Status: in progress.** On ten camera sites held back until the test was fixed, a small trained classifier beat an off-the-shelf model at all ten; see [Answer so far](#answer-so-far). A fully fine-tuned CNN, run as a control, beat the off-the-shelf model but not the simpler trained one. A per-site trust report says how much review a confidence threshold buys; the drift study is still to come.
+**Status: in progress.** On ten camera sites held back until the test was fixed, a small trained classifier beat an off-the-shelf model at all ten; see [Answer so far](#answer-so-far). A fully fine-tuned CNN, run as a control, beat the off-the-shelf model but not the simpler trained one. A per-site trust report says how much review a confidence threshold buys. A drift study found that the model's own confidence ranks sites by accuracy without labels, but predicts a site's accuracy only slightly better than guessing the average, and that how far a site's images sit from the training images says nothing.
 
 ## The question
 
@@ -255,8 +255,9 @@ BioCLIP 2 zero-shot. The gate is run against both on the 33 sites with at least
 The trust report (`make trust-report`, written to
 `results/trust/trust_report.md`) is a per-site audit of the champion, the
 DINOv2 probe, for someone deciding how far to trust its labels. It is
-retrospective: it covers sites that have labels and gives no accuracy for a new,
-unlabelled site, which is the drift study's question. It covers all 49 sites:
+retrospective: it covers sites that have labels. Beside each site's observed
+accuracy it shows the accuracy [the drift study](#the-drift-study) predicts
+without labels, which is all a new site would get. It covers all 49 sites:
 the 39 fold sites, scored out of fold but optimistic because the probe was
 chosen there, and the 10 hold-out sites, scored once by the frozen model. Its
 rules were written into the plan before any of its numbers were computed.
@@ -286,6 +287,76 @@ table rather than as "70% sure".
   they are not at one site, so they are too narrow.
 - Tables (per site, per site and species, per threshold) are in
   `results/trust/`.
+
+### The drift study
+
+Once a model is deployed at a new site there are no labels, so the question
+is whether anything computable without them says how accurate it is there.
+The drift study (`make drift`) replays every sequence through the champion in
+site and date order, computes six label-free signals per site, and scores each
+against the labels held back from it. The signals, the one named as primary,
+the minimum sizes and the use of the hold-out were written into the plan
+before any signal was computed.
+
+Three signals come from the model's own probabilities: mean confidence (the
+top class probability), mean entropy, and ATC
+([Garg et al. 2022](https://arxiv.org/abs/2201.04234)), the primary. ATC
+learns one confidence threshold on labelled sites, set so that the share of
+sequences above it equals their accuracy, and predicts a new site's accuracy
+as its share above that threshold. Two come from the embeddings: the distance
+from a site's sequences to their nearest training sequences (kNN distance),
+and MMD ([Gretton et al. 2012](https://jmlr.org/papers/v13/gretton12a.html)),
+a measure of how differently two sets of vectors are distributed. The last is
+how far the site's mix of predicted species is from the training mix. Nothing
+a site is judged by was learnt from it: for a fold site the model, the
+threshold and the training reference come from the other four folds; for a
+hold-out site, from all fold sites, applied once.
+
+![Accuracy predicted without labels against observed accuracy, per site](figures/drift_predicted_accuracy.png)
+
+- **Confidence ranks sites.** ATC's Spearman correlation with site accuracy
+  is 0.76 over 38 fold sites (95% interval 0.55 to 0.89, resampling sites).
+  On the 10 hold-out sites it is 0.92 (0.65 to 1.00), which agrees but rests
+  on too few sites to add much. Mean confidence (0.81) and entropy (-0.74)
+  do the same job.
+- **As a predicted accuracy it is only slightly better than guessing the
+  average.** On the hold-out sites ATC is off by 2.1 points on average, where
+  giving every site the fold sites' mean accuracy is off by 3.2. The gain of
+  1.1 points has an interval of -0.5 to +2.7, which includes zero, and the
+  fold sites say the same (2.8 against 3.9; +1.1, -0.3 to +2.6). Sites here
+  differ little (most score 85% to 99%), so the average is hard to beat. ATC
+  also ran 1.7 points high on the hold-out.
+- **Distance from the training images says nothing.** kNN distance (-0.07,
+  interval -0.43 to 0.26) and MMD (+0.10, -0.23 to 0.42) show no relationship
+  with accuracy. These are new sites in the same region, so the embeddings
+  barely move; a new region might differ and is untested.
+- **Class-mix shift points the wrong way.** Sites whose predicted species mix
+  differs most from the training mix were more accurate, not less (+0.39,
+  0.10 to 0.61). Unexplained; a site dominated by one easy species would do
+  it, but that was not checked.
+- **Over time, a fall in confidence goes with a fall in accuracy.** Each
+  site's sequences were split into an early and a late half. Over the 34 fold
+  sites with at least 20 sequences in each, the change in mean confidence
+  correlates with the change in accuracy at 0.65 (0.33 to 0.87), and ATC at
+  0.61 (0.25 to 0.88). Accuracy changes there spread 1.5 times wider than
+  chance alone would give, so there was some real change to find. On the
+  hold-out sites there was almost none (1.1 times), and the correlation is
+  uninformative (ATC -0.25, interval -0.86 to 0.64).
+
+![Rank correlation of each signal with site accuracy](figures/drift_signals.png)
+
+In the figure each correlation is flipped where a higher signal should mean
+lower accuracy (entropy, the two distances, class-mix shift), so a point to the
+right of zero is a signal working as hoped; the numbers in the text are unflipped.
+
+- **What it does not show.** Seven months at one study area: no season, no
+  new region, no camera change. A straight line fitted from mean confidence to
+  accuracy did a little better than ATC on the hold-out (off by 1.6 points;
+  gain over the average +1.6, interval +0.2 to +3.1), but it was a secondary
+  measure and is one of several, so it is not the headline. The fold sites
+  are optimistic, because the probe was selected on them.
+- Tables are in `results/drift/`: the replayed stream with per-sequence
+  signals, per-site signals and predictions, and each signal's scores.
 
 ## How it works
 
@@ -324,12 +395,17 @@ flowchart TB
 
     report["Per-site trust report<br>review budget, weak species,<br>Holm regression flags"]
 
+    replay["Replay by site and date<br>champion's predictions in order"]
+    drift["Drift study<br>six label-free signals scored<br>against held-back labels"]
+
     subgraph lifecycle ["Lifecycle (planned)"]
-        replay["Replay by date and site"]
-        drift["Drift signals scored<br>against held-back labels"]
         review["Review queue<br>sampled sequences"]
-        mlflow -. "champion" .-> replay -.-> drift -.-> review
     end
+
+    embeddings --> replay
+    mlflow -- "champion" --> replay --> drift
+    drift -- "predicted accuracy" --> report
+    drift -.-> review
 
     baselines -- "scores per site" --> gate
     baselines -- "champion's predictions" --> report
@@ -447,7 +523,8 @@ make holdout-check    # check the freeze, inputs and caches; fits and scores not
 make holdout          # one shot: score the hold-out and run the gate; writes results/holdout/
 make cnn-control      # optional: fine-tune the CNN control (about 14 h on CPU, resumes); writes its logits to results/control/
 make control          # report the control from its committed logits; writes results/control/ and figures/
-make trust-report     # per-site trust report for the champion (about 3 min); writes results/trust/ and figures/
+make drift            # replay the champion and score six label-free signals (about 7 min, needs the embedding caches); writes results/drift/
+make trust-report     # per-site trust report for the champion, with drift's predicted accuracy (about 3 min); writes results/trust/ and figures/
 make track            # rebuild the MLflow runs and aliases from committed results
 make gate-calibrate   # fixed-tolerance false-block rates (stand-in pair, kept for the record); writes results/gate/
 ```

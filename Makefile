@@ -104,6 +104,9 @@ control: ## Report the CNN control from its committed logits; writes results/con
 trust-report: ## Per-site trust report for the champion from committed predictions; writes results/trust/ and figures/
 	PYTHONPATH=src python -m cameratrap.report.trust
 
+drift: ## Replay the champion in site and date order and score six label-free signals; writes results/drift/ and figures/
+	PYTHONPATH=src python -m cameratrap.report.drift
+
 # Both outputs are git-ignored and derived from committed results.
 track: ## Rebuild mlflow.db and mlruns/ from the committed results: runs, versions and aliases
 	rm -rf mlflow.db mlruns

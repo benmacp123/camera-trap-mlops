@@ -176,3 +176,31 @@ def test_run_writes_a_report_with_the_suggested_threshold(tmp_path):
     text = (tmp_path / "report.md").read_text()
     assert "Suggested threshold 0.6" in text
     json.dumps(summary)
+
+
+def test_predicted_accuracy_is_joined_and_its_error_reported(tmp_path):
+    """The drift study's estimate lands beside the observed accuracy, gaps and all."""
+    rows = site_rows("F0", "fold", 40, 4, 4) + site_rows("H0", "holdout", 40, 2, 2)
+    rows += site_rows("H1", "holdout", 40, 0, 0)
+    predicted = pl.DataFrame({"site": ["F0", "H0"], "predicted_accuracy": [0.8, 0.9]})
+    summary, per_site, _, budget = trust.run(
+        make_table(rows), FAST_GATE, FAST_SETTINGS, predicted=predicted
+    )
+    by_site = dict(per_site.select("site", "predicted_accuracy").iter_rows())
+    assert by_site == {"F0": 0.8, "H0": 0.9, "H1": None}
+    # F0 scores 0.90 against a predicted 0.80; H0 0.95 against 0.90.
+    assert summary["predicted_accuracy_mean_error"] == pytest.approx(
+        {"fold": 0.1, "holdout": 0.05}
+    )
+    trust.write_report(summary, per_site, budget, tmp_path / "report.md")
+    text = (tmp_path / "report.md").read_text()
+    assert "Predicted accuracy" in text and "5.0 points on holdout sites" in text
+
+
+def test_report_without_a_drift_study_has_no_predicted_column(tmp_path):
+    """Before the drift study has run, the report is written without the column."""
+    rows = site_rows("F0", "fold", 40, 4, 4) + site_rows("H0", "holdout", 40, 2, 2)
+    summary, per_site, _, budget = trust.run(make_table(rows), FAST_GATE, FAST_SETTINGS)
+    assert summary["predicted_accuracy_mean_error"] is None
+    trust.write_report(summary, per_site, budget, tmp_path / "report.md")
+    assert "Predicted accuracy" not in (tmp_path / "report.md").read_text()

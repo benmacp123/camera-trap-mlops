@@ -16,7 +16,12 @@ rule; Holm flags at least as many sites, which suits a report). A site with
 so few disagreements that no result could clear Holm's strictest cut-off is
 labelled "too little data to judge", not passed.
 
-Reads committed sequence predictions only, so it needs no model stack.
+Where the drift study has run, its label-free predicted accuracy (ATC) is
+shown beside the observed accuracy, so a reader can see how far the number
+a new site would get is from the truth.
+
+Reads committed sequence predictions and the drift study's committed
+per-site table only, so it needs no model stack.
 Writes ``results/trust/``: ``per_site.csv``, ``per_species.csv``,
 ``thresholds.csv``, ``summary.json`` and ``trust_report.md``, and
 ``figures/trust_review_budget.png``.
@@ -54,6 +59,8 @@ SETTINGS = {
 }
 SOURCES = {"fold": Path("results/challengers"), "holdout": Path("results/holdout")}
 FREEZE_PATH = Path("config/holdout_freeze.json")
+# The drift study's label-free estimate; absent until `make drift` has run.
+DRIFT_PATH = Path("results/drift/per_site.csv")
 OUT_DIR = Path("results/trust")
 FIGURE_DIR = Path("figures")
 COLOURS = {"fold": "#8a8984", "holdout": "#1baf7a"}
@@ -324,13 +331,16 @@ def site_table(table, gate, settings):
     return pl.DataFrame(rows)
 
 
-def run(table, gate, settings=None):
+def run(table, gate, settings=None, predicted=None):
     """Build every trust table from the joined predictions.
 
     Args:
         table: Output of ``load_predictions``.
         gate: The frozen ``GateConfig``.
         settings: Defaults to ``SETTINGS``.
+        predicted: Optional DataFrame with ``site`` and
+            ``predicted_accuracy``, the drift study's label-free estimate;
+            sites it lacks get a null.
 
     Returns:
         A tuple ``(summary, per_site, species, budget)``: a JSON-ready dict,
@@ -359,6 +369,13 @@ def run(table, gate, settings=None):
         .join(weak, on="site", how="left")
         .sort("source", "site", descending=[True, False])
     )
+    if predicted is not None:
+        per_site = per_site.join(
+            predicted.select("site", "predicted_accuracy"),
+            on="site",
+            how="left",
+            maintain_order="left",
+        )
 
     def at(source):
         """Return the budget row for one source at the suggested threshold."""
@@ -382,6 +399,7 @@ def run(table, gate, settings=None):
         "flagged_sites": per_site.filter(pl.col("status") == STATUS_FLAGGED)[
             "site"
         ].to_list(),
+        "predicted_accuracy_mean_error": predicted_error(per_site),
         "weak_species_cells": int((species["status"] == "weak").sum()),
         "weak_by_species": dict(
             sorted(
@@ -392,6 +410,23 @@ def run(table, gate, settings=None):
         ),
     }
     return summary, per_site, species, budget
+
+
+def predicted_error(per_site):
+    """Return how far the label-free predicted accuracy sits from the observed.
+
+    Args:
+        per_site: The per-site table, with or without ``predicted_accuracy``.
+
+    Returns:
+        A dict of source to the mean absolute gap over its sites that have
+        a prediction, or None when the table has no predictions.
+    """
+    if "predicted_accuracy" not in per_site.columns:
+        return None
+    rows = per_site.drop_nulls("predicted_accuracy")
+    gap = (pl.col("predicted_accuracy") - pl.col("accuracy")).abs().mean()
+    return dict(sorted(rows.group_by("source").agg(gap).iter_rows()))
 
 
 def pct(value, decimals=0):
@@ -494,12 +529,38 @@ def write_report(summary, per_site, budget, path):
         "narrow.",
         "",
     ]
+    errors = summary["predicted_accuracy_mean_error"]
+    if errors:
+        lines += [
+            "Predicted accuracy is the drift study's estimate of plain accuracy "
+            "from the model's confidence alone (ATC), made without the site's "
+            "labels; it is what a new site would get. Against the observed "
+            "accuracy it is off by "
+            + " and ".join(
+                f"{100 * gap:.1f} points on {source} sites"
+                for source, gap in sorted(errors.items(), reverse=True)
+            )
+            + " on average. A dash means too few sequences to estimate.",
+            "",
+        ]
     rows = [
         [
             row["site"],
             row["source"],
             str(row["n"]),
             f"{row['balanced_accuracy']:.2f} ({row['ba_low']:.2f}–{row['ba_high']:.2f})",
+            *(
+                [
+                    f"{row['accuracy']:.2f}",
+                    (
+                        "–"
+                        if row["predicted_accuracy"] is None
+                        else f"{row['predicted_accuracy']:.2f}"
+                    ),
+                ]
+                if errors
+                else []
+            ),
             f"{100 * row['gain']:+.1f}",
             row["status"],
             pct(row["review_share"]),
@@ -513,6 +574,7 @@ def write_report(summary, per_site, budget, path):
         "Split",
         "Sequences",
         "Balanced accuracy (95%)",
+        *(["Accuracy", "Predicted accuracy"] if errors else []),
         "Gain (points)",
         "Regression",
         f"Reviewed at {t:g}" if t is not None else "Reviewed",
@@ -614,7 +676,9 @@ def main(argv=None):
 
     _, gate = freeze.load(args.root / FREEZE_PATH)
     table = load_predictions(args.root)
-    summary, per_site, species, budget = run(table, gate)
+    drift_path = args.root / DRIFT_PATH
+    predicted = pl.read_csv(drift_path) if drift_path.exists() else None
+    summary, per_site, species, budget = run(table, gate, predicted=predicted)
 
     out = args.root / args.out_dir
     figures = args.root / args.figure_dir

@@ -33,54 +33,56 @@ A sequence is accepted without review when the model's top probability is at lea
 
 Regression: Holm over all 49 sites at alpha 0.05, against BioCLIP 2 zero-shot. 'too little data to judge' means the two models disagree on too few sequences for any drop to be detectable: send those sites to specialist review rather than reading them as safe. Weak species: recall below 70% with at least 5 sequences. The accuracy interval treats sequences as independent, so it is too narrow.
 
-| Site | Split | Sequences | Balanced accuracy (95%) | Gain (points) | Regression | Reviewed at 0.5 | Residual error | Weak species |
-|---|---|---|---|---|---|---|---|---|
-| A02 | holdout | 161 | 0.90 (0.80–0.98) | +25.0 | no regression found | 9% | 3.7% | collared peccary |
-| A03 | holdout | 59 | 0.98 (0.94–1.00) | +17.2 | too little data to judge | 2% | 1.7% |  |
-| A07 | holdout | 49 | 0.98 (0.94–1.00) | +11.9 | no regression found | 0% | 4.1% |  |
-| N00 | holdout | 267 | 0.88 (0.82–0.93) | +0.7 | no regression found | 12% | 6.4% |  |
-| N13 | holdout | 254 | 0.95 (0.91–0.97) | +7.2 | no regression found | 3% | 3.9% |  |
-| N14 | holdout | 555 | 0.90 (0.81–0.98) | +0.2 | no regression found | 8% | 4.0% |  |
-| N19 | holdout | 110 | 0.93 (0.88–0.97) | +9.7 | no regression found | 11% | 5.5% |  |
-| N23 | holdout | 162 | 1.00 (0.99–1.00) | +10.0 | too little data to judge | 1% | 0.6% |  |
-| N31 | holdout | 97 | 0.90 (0.81–0.99) | +1.3 | too little data to judge | 3% | 6.2% |  |
-| N33 | holdout | 85 | 0.91 (0.80–0.98) | +14.0 | no regression found | 6% | 2.4% |  |
-| A01 | fold | 69 | 0.88 (0.81–0.95) | +14.5 | no regression found | 13% | 7.2% |  |
-| A04 | fold | 22 | 0.96 (0.83–1.00) | +8.3 | too little data to judge | 5% | 4.5% |  |
-| A05 | fold | 142 | 0.95 (0.90–0.98) | +6.8 | no regression found | 7% | 10.6% |  |
-| A06 | fold | 224 | 0.96 (0.94–0.98) | +4.9 | no regression found | 3% | 4.0% |  |
-| A08 | fold | 145 | 0.94 (0.84–1.00) | +13.1 | no regression found | 5% | 0.7% |  |
-| A09 | fold | 83 | 0.88 (0.81–0.99) | +7.4 | no regression found | 10% | 3.6% |  |
-| M00 | fold | 231 | 0.96 (0.94–0.99) | +1.8 | no regression found | 4% | 2.6% |  |
-| M01 | fold | 331 | 0.84 (0.74–0.98) | +8.9 | no regression found | 11% | 3.0% |  |
-| M02 | fold | 290 | 0.93 (0.89–0.96) | +11.2 | no regression found | 12% | 3.4% | white-lipped peccary |
-| M03 | fold | 121 | 0.85 (0.76–0.92) | +5.4 | no regression found | 8% | 9.1% |  |
-| M04 | fold | 934 | 0.83 (0.79–0.95) | +7.8 | no regression found | 11% | 4.3% |  |
-| M05 | fold | 252 | 0.82 (0.69–0.94) | +4.5 | no regression found | 14% | 2.8% | white-lipped peccary |
-| N01 | fold | 26 | 0.97 (0.89–1.00) | +1.4 | too little data to judge | 4% | 0.0% |  |
-| N02 | fold | 149 | 0.73 (0.59–0.91) | +4.4 | no regression found | 28% | 10.1% | lowland tapir |
-| N03 | fold | 90 | 0.96 (0.91–1.00) | +12.1 | no regression found | 2% | 2.2% |  |
-| N04 | fold | 224 | 0.97 (0.93–1.00) | +6.7 | no regression found | 3% | 0.4% |  |
-| N05 | fold | 45 | 0.91 (0.80–0.99) | -0.7 | too little data to judge | 13% | 6.7% |  |
-| N06 | fold | 50 | 0.97 (0.92–1.00) | +10.8 | too little data to judge | 12% | 0.0% |  |
-| N07 | fold | 364 | 0.96 (0.92–0.99) | +6.4 | no regression found | 7% | 2.2% |  |
-| N08 | fold | 216 | 0.79 (0.66–0.92) | +14.8 | no regression found | 22% | 6.0% |  |
-| N09 | fold | 106 | 0.87 (0.75–0.93) | +7.2 | no regression found | 18% | 1.9% | collared peccary |
-| N10 | fold | 71 | 0.98 (0.94–1.00) | +9.4 | too little data to judge | 0% | 1.4% |  |
-| N11 | fold | 170 | 0.84 (0.72–0.96) | +10.1 | no regression found | 13% | 3.5% |  |
-| N12 | fold | 134 | 0.91 (0.82–0.97) | +11.4 | no regression found | 10% | 3.7% | black agouti |
-| N15 | fold | 78 | 0.87 (0.73–0.98) | +8.0 | no regression found | 12% | 3.8% |  |
-| N16 | fold | 32 | 0.94 (0.75–1.00) | +26.1 | too little data to judge | 3% | 0.0% |  |
-| N17 | fold | 76 | 0.95 (0.86–0.99) | +1.9 | too little data to judge | 1% | 3.9% |  |
-| N20 | fold | 157 | 0.84 (0.72–0.93) | +4.7 | no regression found | 10% | 3.8% | black agouti |
-| N21 | fold | 117 | 0.94 (0.81–1.00) | -2.8 | too little data to judge | 4% | 1.7% |  |
-| N22 | fold | 188 | 0.74 (0.71–0.95) | +6.9 | no regression found | 18% | 1.6% |  |
-| N24 | fold | 85 | 0.85 (0.75–0.97) | -1.5 | too little data to judge | 5% | 2.4% |  |
-| N25 | fold | 635 | 0.94 (0.91–0.96) | +1.8 | no regression found | 8% | 6.5% |  |
-| N26 | fold | 91 | 0.97 (0.93–0.99) | +12.5 | no regression found | 7% | 3.3% |  |
-| N27 | fold | 407 | 0.93 (0.87–0.97) | +1.9 | no regression found | 2% | 1.7% |  |
-| N29 | fold | 1027 | 0.90 (0.87–0.92) | +7.1 | no regression found | 7% | 5.6% | white-lipped peccary |
-| N30 | fold | 72 | 0.98 (0.96–1.00) | +10.3 | no regression found | 0% | 4.2% |  |
-| N32 | fold | 1 | 1.00 (1.00–1.00) | +0.0 | too little data to judge | 0% | 0.0% |  |
-| N34 | fold | 111 | 0.92 (0.87–0.96) | +8.3 | no regression found | 7% | 5.4% |  |
-| N36 | fold | 24 | 0.78 (0.62–1.00) | -12.7 | too little data to judge | 21% | 0.0% |  |
+Predicted accuracy is the drift study's estimate of plain accuracy from the model's confidence alone (ATC), made without the site's labels; it is what a new site would get. Against the observed accuracy it is off by 2.1 points on holdout sites and 2.8 points on fold sites on average. A dash means too few sequences to estimate.
+
+| Site | Split | Sequences | Balanced accuracy (95%) | Accuracy | Predicted accuracy | Gain (points) | Regression | Reviewed at 0.5 | Residual error | Weak species |
+|---|---|---|---|---|---|---|---|---|---|---|
+| A02 | holdout | 161 | 0.90 (0.80–0.98) | 0.93 | 0.92 | +25.0 | no regression found | 9% | 3.7% | collared peccary |
+| A03 | holdout | 59 | 0.98 (0.94–1.00) | 0.97 | 0.98 | +17.2 | too little data to judge | 2% | 1.7% |  |
+| A07 | holdout | 49 | 0.98 (0.94–1.00) | 0.96 | 1.00 | +11.9 | no regression found | 0% | 4.1% |  |
+| N00 | holdout | 267 | 0.88 (0.82–0.93) | 0.85 | 0.89 | +0.7 | no regression found | 12% | 6.4% |  |
+| N13 | holdout | 254 | 0.95 (0.91–0.97) | 0.94 | 0.97 | +7.2 | no regression found | 3% | 3.9% |  |
+| N14 | holdout | 555 | 0.90 (0.81–0.98) | 0.92 | 0.92 | +0.2 | no regression found | 8% | 4.0% |  |
+| N19 | holdout | 110 | 0.93 (0.88–0.97) | 0.90 | 0.91 | +9.7 | no regression found | 11% | 5.5% |  |
+| N23 | holdout | 162 | 1.00 (0.99–1.00) | 0.99 | 0.99 | +10.0 | too little data to judge | 1% | 0.6% |  |
+| N31 | holdout | 97 | 0.90 (0.81–0.99) | 0.93 | 0.97 | +1.3 | too little data to judge | 3% | 6.2% |  |
+| N33 | holdout | 85 | 0.91 (0.80–0.98) | 0.95 | 0.94 | +14.0 | no regression found | 6% | 2.4% |  |
+| A01 | fold | 69 | 0.88 (0.81–0.95) | 0.86 | 0.87 | +14.5 | no regression found | 13% | 7.2% |  |
+| A04 | fold | 22 | 0.96 (0.83–1.00) | 0.95 | 0.95 | +8.3 | too little data to judge | 5% | 4.5% |  |
+| A05 | fold | 142 | 0.95 (0.90–0.98) | 0.85 | 0.93 | +6.8 | no regression found | 7% | 10.6% |  |
+| A06 | fold | 224 | 0.96 (0.94–0.98) | 0.95 | 0.98 | +4.9 | no regression found | 3% | 4.0% |  |
+| A08 | fold | 145 | 0.94 (0.84–1.00) | 0.97 | 0.96 | +13.1 | no regression found | 5% | 0.7% |  |
+| A09 | fold | 83 | 0.88 (0.81–0.99) | 0.95 | 0.92 | +7.4 | no regression found | 10% | 3.6% |  |
+| M00 | fold | 231 | 0.96 (0.94–0.99) | 0.95 | 0.96 | +1.8 | no regression found | 4% | 2.6% |  |
+| M01 | fold | 331 | 0.84 (0.74–0.98) | 0.91 | 0.89 | +8.9 | no regression found | 11% | 3.0% |  |
+| M02 | fold | 290 | 0.93 (0.89–0.96) | 0.91 | 0.88 | +11.2 | no regression found | 12% | 3.4% | white-lipped peccary |
+| M03 | fold | 121 | 0.85 (0.76–0.92) | 0.86 | 0.93 | +5.4 | no regression found | 8% | 9.1% |  |
+| M04 | fold | 934 | 0.83 (0.79–0.95) | 0.90 | 0.89 | +7.8 | no regression found | 11% | 4.3% |  |
+| M05 | fold | 252 | 0.82 (0.69–0.94) | 0.90 | 0.87 | +4.5 | no regression found | 14% | 2.8% | white-lipped peccary |
+| N01 | fold | 26 | 0.97 (0.89–1.00) | 0.96 | 0.96 | +1.4 | too little data to judge | 4% | 0.0% |  |
+| N02 | fold | 149 | 0.73 (0.59–0.91) | 0.74 | 0.74 | +4.4 | no regression found | 28% | 10.1% | lowland tapir |
+| N03 | fold | 90 | 0.96 (0.91–1.00) | 0.96 | 0.98 | +12.1 | no regression found | 2% | 2.2% |  |
+| N04 | fold | 224 | 0.97 (0.93–1.00) | 0.98 | 0.97 | +6.7 | no regression found | 3% | 0.4% |  |
+| N05 | fold | 45 | 0.91 (0.80–0.99) | 0.91 | 0.87 | -0.7 | too little data to judge | 13% | 6.7% |  |
+| N06 | fold | 50 | 0.97 (0.92–1.00) | 0.96 | 0.88 | +10.8 | too little data to judge | 12% | 0.0% |  |
+| N07 | fold | 364 | 0.96 (0.92–0.99) | 0.95 | 0.93 | +6.4 | no regression found | 7% | 2.2% |  |
+| N08 | fold | 216 | 0.79 (0.66–0.92) | 0.81 | 0.77 | +14.8 | no regression found | 22% | 6.0% |  |
+| N09 | fold | 106 | 0.87 (0.75–0.93) | 0.88 | 0.82 | +7.2 | no regression found | 18% | 1.9% | collared peccary |
+| N10 | fold | 71 | 0.98 (0.94–1.00) | 0.99 | 1.00 | +9.4 | too little data to judge | 0% | 1.4% |  |
+| N11 | fold | 170 | 0.84 (0.72–0.96) | 0.91 | 0.87 | +10.1 | no regression found | 13% | 3.5% |  |
+| N12 | fold | 134 | 0.91 (0.82–0.97) | 0.91 | 0.90 | +11.4 | no regression found | 10% | 3.7% | black agouti |
+| N15 | fold | 78 | 0.87 (0.73–0.98) | 0.90 | 0.88 | +8.0 | no regression found | 12% | 3.8% |  |
+| N16 | fold | 32 | 0.94 (0.75–1.00) | 0.97 | 0.97 | +26.1 | too little data to judge | 3% | 0.0% |  |
+| N17 | fold | 76 | 0.95 (0.86–0.99) | 0.95 | 0.99 | +1.9 | too little data to judge | 1% | 3.9% |  |
+| N20 | fold | 157 | 0.84 (0.72–0.93) | 0.92 | 0.90 | +4.7 | no regression found | 10% | 3.8% | black agouti |
+| N21 | fold | 117 | 0.94 (0.81–1.00) | 0.96 | 0.96 | -2.8 | too little data to judge | 4% | 1.7% |  |
+| N22 | fold | 188 | 0.74 (0.71–0.95) | 0.86 | 0.82 | +6.9 | no regression found | 18% | 1.6% |  |
+| N24 | fold | 85 | 0.85 (0.75–0.97) | 0.94 | 0.95 | -1.5 | too little data to judge | 5% | 2.4% |  |
+| N25 | fold | 635 | 0.94 (0.91–0.96) | 0.88 | 0.92 | +1.8 | no regression found | 8% | 6.5% |  |
+| N26 | fold | 91 | 0.97 (0.93–0.99) | 0.95 | 0.93 | +12.5 | no regression found | 7% | 3.3% |  |
+| N27 | fold | 407 | 0.93 (0.87–0.97) | 0.97 | 0.98 | +1.9 | no regression found | 2% | 1.7% |  |
+| N29 | fold | 1027 | 0.90 (0.87–0.92) | 0.91 | 0.94 | +7.1 | no regression found | 7% | 5.6% | white-lipped peccary |
+| N30 | fold | 72 | 0.98 (0.96–1.00) | 0.96 | 1.00 | +10.3 | no regression found | 0% | 4.2% |  |
+| N32 | fold | 1 | 1.00 (1.00–1.00) | 1.00 | – | +0.0 | too little data to judge | 0% | 0.0% |  |
+| N34 | fold | 111 | 0.92 (0.87–0.96) | 0.90 | 0.93 | +8.3 | no regression found | 7% | 5.4% |  |
+| N36 | fold | 24 | 0.78 (0.62–1.00) | 0.92 | 0.79 | -12.7 | too little data to judge | 21% | 0.0% |  |

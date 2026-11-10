@@ -50,6 +50,10 @@
     "too little data to judge": 14
   },
   "flagged_sites": [],
+  "predicted_accuracy_mean_error": {
+    "fold": 0.027902324276145595,
+    "holdout": 0.020659687899683622
+  },
   "weak_species_cells": 8,
   "weak_by_species": {
     "black_agouti": 2,
