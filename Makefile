@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control trust-report track gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control trust-report drift review track gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -106,6 +106,9 @@ trust-report: ## Per-site trust report for the champion from committed predictio
 
 drift: ## Replay the champion in site and date order and score six label-free signals; writes results/drift/ and figures/
 	PYTHONPATH=src python -m cameratrap.report.drift
+
+review: ## Simulate the review loop: queue, label, retrain and gate at new sites (about 20 min, 8 cores); writes results/review/ and figures/
+	PYTHONPATH=src python -m cameratrap.report.review
 
 # Both outputs are git-ignored and derived from committed results.
 track: ## Rebuild mlflow.db and mlruns/ from the committed results: runs, versions and aliases

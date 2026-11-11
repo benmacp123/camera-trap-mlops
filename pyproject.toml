@@ -19,6 +19,7 @@ core = [
     "polars==2.0.0",
     "scipy==1.18.1",
     "scikit-learn==1.9.1",
+    "joblib==1.6.0",
     "matplotlib==3.11.2",
     "mlflow==3.17.2",
     "huggingface-hub==2.3.0",

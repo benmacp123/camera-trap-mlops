@@ -19,6 +19,7 @@ rather than the file store.
 """
 
 import argparse
+import csv
 import json
 import sys
 import tempfile
@@ -37,6 +38,13 @@ HOLDOUT = Path("results/holdout")
 HOLDOUT_FILES = ("summary.json", "per_site.csv")
 CONTROL = Path("results/control")
 CONTROL_FILES = ("summary.json", "per_site.csv", "per_class.csv")
+REVIEW = Path("results/review")
+REVIEW_FILES = ("summary.json", "cells.csv", "per_site.csv", "comparisons.csv")
+REVIEW_METRICS = ("sites", "labels", "champion_mean", "challenger_mean") + (
+    "mean_gain",
+    "low",
+    "high",
+)
 
 
 def log_run(client, experiment_id, name, params, metrics, tags, files=()):
@@ -175,6 +183,61 @@ def log_control(client, experiment_id, root):
     )
 
 
+def log_review(client, experiment_id, root):
+    """Log the simulated review loop, if it has been run.
+
+    Every cell (a queue strategy, budget, weight and seed on one set of
+    sites) is a run tagged with the gate's decision, and one further run
+    holds the tables. None gets a model version: the fold-site models are
+    five cross-fitted probes, and the hold-out is already spent, so no
+    alias may follow these decisions.
+
+    Args:
+        client: An ``MlflowClient``.
+        experiment_id: The experiment to log under.
+        root: The repository root, a ``pathlib.Path``.
+
+    Returns:
+        The number of cell runs logged; 0 if there is no review result yet.
+    """
+    folder = root / REVIEW
+    if not (folder / "cells.csv").exists():
+        return 0
+    primary = json.loads((folder / "summary.json").read_text())["settings"]["primary"]
+    with open(folder / "cells.csv", newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    for row in rows:
+        params = {k: row[k] for k in ("source", "strategy", "budget", "weight", "seed")}
+        is_primary = (
+            row["strategy"] == primary["strategy"]
+            and row["budget"] == str(primary["budget"])
+            and float(row["weight"]) == primary["weight"]
+        )
+        log_run(
+            client,
+            experiment_id,
+            "review-" + "-".join(params.values()),
+            params,
+            {k: float(row[k]) for k in REVIEW_METRICS},
+            {
+                "role": "review-loop",
+                "evaluated_on": f"{row['source']} sites, late half",
+                "gate_decision": "promoted" if row["promote"] == "true" else "rejected",
+                "primary": str(is_primary),
+            },
+        )
+    log_run(
+        client,
+        experiment_id,
+        "review-loop-tables",
+        {"primary": json.dumps(primary, sort_keys=True)},
+        {"cells": len(rows)},
+        {"role": "review-loop-tables"},
+        [folder / name for name in REVIEW_FILES],
+    )
+    return len(rows)
+
+
 def sync(client, root, artifact_location):
     """Log every arm, register the two put forward, and apply any decision.
 
@@ -218,6 +281,7 @@ def sync(client, root, artifact_location):
         for arm, entry in summary["arms"].items()
     }
     log_control(client, experiment, root)
+    log_review(client, experiment, root)
 
     client.create_registered_model(MODEL_NAME)
     champion, challenger = config["champion"], config["challenger"]

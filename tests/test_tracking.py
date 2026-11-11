@@ -212,3 +212,49 @@ def test_no_control_result_logs_no_control_run(client, repo):
     run_sync(client, repo)
     experiment = client.get_experiment_by_name(registry.EXPERIMENT).experiment_id
     assert not client.search_runs([experiment], "tags.role = 'control'")
+
+
+def write_review(root):
+    """Write a two-cell review result: the primary rejected, another promoted.
+
+    Args:
+        root: The repository root.
+    """
+    folder = root / registry.REVIEW
+    folder.mkdir(parents=True)
+    primary = {"strategy": "diverse", "budget": 20, "weight": 1.0}
+    (folder / "summary.json").write_text(json.dumps({"settings": {"primary": primary}}))
+    header = "source,strategy,weight,seed,budget,sites,labels,champion_mean,"
+    header += "challenger_mean,mean_gain,low,high,promote"
+    rows = [
+        "fold,diverse,1.0,0,20,34,680,0.9,0.9,0.0,-0.01,0.01,false",
+        "fold,diverse,10.0,0,20,34,680,0.9,0.92,0.02,0.01,0.03,true",
+    ]
+    (folder / "cells.csv").write_text("\n".join([header, *rows]) + "\n")
+    for name in ("per_site.csv", "comparisons.csv"):
+        (folder / name).write_text("site\nS0\n")
+
+
+def test_review_cells_are_runs_with_their_decision_and_move_nothing(client, repo):
+    """Each review cell is logged with the gate's verdict; no alias follows one."""
+    write_result(repo, promote=True)
+    write_review(repo)
+    aliases = run_sync(client, repo)
+    assert set(aliases) == {"champion", "previous_champion"}
+    experiment = client.get_experiment_by_name(registry.EXPERIMENT).experiment_id
+    runs = client.search_runs([experiment], "tags.role = 'review-loop'")
+    verdicts = {r.data.params["weight"]: r.data.tags["gate_decision"] for r in runs}
+    assert verdicts == {"1.0": "rejected", "10.0": "promoted"}
+    assert {r.data.tags["primary"] for r in runs} == {"True", "False"}
+    versions = client.search_model_versions(f"name = '{registry.MODEL_NAME}'")
+    assert not {r.info.run_id for r in runs} & {v.run_id for v in versions}
+    tables = client.search_runs([experiment], "tags.role = 'review-loop-tables'")
+    files = {f.path for f in client.list_artifacts(tables[0].info.run_id)}
+    assert files == set(registry.REVIEW_FILES)
+
+
+def test_no_review_result_logs_no_review_run(client, repo):
+    """Before the review loop has run, the rebuild logs nothing for it."""
+    run_sync(client, repo)
+    experiment = client.get_experiment_by_name(registry.EXPERIMENT).experiment_id
+    assert not client.search_runs([experiment], "tags.role = 'review-loop'")

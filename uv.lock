@@ -224,6 +224,7 @@ baselines = [
 ]
 core = [
     { name = "huggingface-hub" },
+    { name = "joblib" },
     { name = "matplotlib" },
     { name = "mlflow" },
     { name = "numpy" },
@@ -234,6 +235,7 @@ core = [
 dev = [
     { name = "black" },
     { name = "huggingface-hub" },
+    { name = "joblib" },
     { name = "matplotlib" },
     { name = "mlflow" },
     { name = "numpy" },
@@ -267,6 +269,7 @@ baselines = [
 ]
 core = [
     { name = "huggingface-hub", specifier = "==2.3.0" },
+    { name = "joblib", specifier = "==1.6.0" },
     { name = "matplotlib", specifier = "==3.11.2" },
     { name = "mlflow", specifier = "==3.17.2" },
     { name = "numpy", specifier = "==2.5.4" },
@@ -277,6 +280,7 @@ core = [
 dev = [
     { name = "black", specifier = "==26.10.1" },
     { name = "huggingface-hub", specifier = "==2.3.0" },
+    { name = "joblib", specifier = "==1.6.0" },
     { name = "matplotlib", specifier = "==3.11.2" },
     { name = "mlflow", specifier = "==3.17.2" },
     { name = "numpy", specifier = "==2.5.4" },

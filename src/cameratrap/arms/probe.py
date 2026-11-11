@@ -7,7 +7,7 @@ an inner grouped split, never on the scored fold.
 """
 
 import numpy as np
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.model_selection import GroupKFold
 
 # Fixed before the spike (provisional judgement, 2026-10-28).
@@ -47,6 +47,36 @@ def fit(features, labels, groups, classes, inner_folds=INNER_FOLDS, cs=CS):
         scoring=INNER_SCORING,
         use_legacy_attributes=False,
     ).fit(features, y)
+
+
+def refit(features, labels, classes, c, sample_weight=None):
+    """Fit the probe at a fixed C, with no inner search.
+
+    Used when a model is retrained on more data and only the data should
+    change: the recipe and the regularisation strength stay as they were.
+
+    Args:
+        features: Array of shape ``(n, d)``.
+        labels: Class name of each row.
+        classes: Class names; the returned model's logits follow this order.
+        c: Inverse regularisation strength, usually the C that ``fit`` chose.
+        sample_weight: Weight of each row, multiplied with the class
+            balancing; ``None`` weights every row equally.
+
+    Returns:
+        A fitted ``LogisticRegression``.
+
+    Raises:
+        ValueError: If the rows lack one of the classes, which would leave
+            a logit column undefined.
+    """
+    missing = set(classes) - set(labels)
+    if missing:
+        raise ValueError(f"training rows lack {sorted(missing)}")
+    y = np.array([classes.index(c_name) for c_name in labels])
+    return LogisticRegression(C=c, class_weight=CLASS_WEIGHT, max_iter=MAX_ITER).fit(
+        features, y, sample_weight=sample_weight
+    )
 
 
 def out_of_fold_logits(features, labels, groups, folds, classes):
