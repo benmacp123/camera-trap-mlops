@@ -28,12 +28,10 @@ from huggingface_hub import try_to_load_from_cache
 from PIL import Image
 
 from cameratrap.data import crops, orinoquia
-from cameratrap.embed import bioclip, store
+from cameratrap.embed import bioclip, dinov2, store
 
-DINOV2_ID = "timm/vit_base_patch14_dinov2.lvd142m"
-# DINOv2's default 518 px runs at 1 crop/s on CPU; 224 px runs at 7.5 and
-# suits crops whose long side is capped at 448. Fixed before Phase 2.
-DINOV2_SIZE = 224
+DINOV2_ID = dinov2.MODEL_ID
+DINOV2_SIZE = dinov2.SIZE
 CHUNK = 512
 # Re-embedded vectors must match the cache to this cosine; CPU float maths
 # differs slightly with thread count, so exact equality is not expected.
@@ -119,21 +117,12 @@ def load_dinov2():
     Returns:
         A ``Backbone`` with no extras.
     """
-    model = timm.create_model(
-        DINOV2_ID.removeprefix("timm/"),
-        pretrained=True,
-        num_classes=0,
-        img_size=DINOV2_SIZE,
-    ).eval()
-    # The pretrained config still says 518 px after img_size=224, so the
-    # input size is passed explicitly or the transform would resize to 518.
-    config = timm.data.resolve_data_config(
-        {"input_size": (3, DINOV2_SIZE, DINOV2_SIZE)}, model=model
-    )
+    # Built in ``dinov2`` so the Lambda route shares the model and transform.
+    model, preprocess = dinov2.create()
     return Backbone(
         name="dinov2",
         model=model,
-        preprocess=timm.data.create_transform(**config),
+        preprocess=preprocess,
         encode=model,
         meta={
             "model_id": DINOV2_ID,

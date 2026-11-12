@@ -1,0 +1,16 @@
+# The image needs a handful of files; everything else (20 GB of images,
+# the venv, caches) stays out of the build context.
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!build/lambda/model.safetensors
+!results/holdout/probe_head.npz
+!src/cameratrap/__init__.py
+!src/cameratrap/embed/__init__.py
+!src/cameratrap/embed/dinov2.py
+!src/cameratrap/arms/__init__.py
+!src/cameratrap/arms/head.py
+!src/cameratrap/arms/champion.py
+!src/cloud/__init__.py
+!src/cloud/handler.py

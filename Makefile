@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control trust-report drift review track gate-calibrate hub-stage hub-upload fetch-embeddings test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control trust-report drift review track gate-calibrate hub-stage hub-upload fetch-embeddings prices lambda-model lambda-image cloud-emulate tf-fmt tf-check tf-plan tf-apply tf-output lambda-push cloud-upload cloud-sweep cloud-run tf-destroy cloud-leftovers test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -125,6 +125,120 @@ REPO_ID ?= benmacp123/orinoquia-crop-embeddings
 
 hub-upload: ## Owner only: upload data/hub_stage/ to REPO_ID (needs `hf auth login`)
 	PYTHONPATH=src python -m cameratrap.embed.hub upload --repo-id $(REPO_ID)
+
+# Phase 8, the AWS batch route. Everything down to tf-check runs without an
+# account. Docker commands use --network host: the bridge network here has
+# no DNS.
+prices: ## Refresh the AWS list-price snapshot in data/prices/ (public files, no account)
+	PYTHONPATH=src python -m cloud.prices
+
+# The revision the DINOv2 embedding cache records, so the image holds the
+# weights every committed prediction was made with.
+DINOV2_REVISION = 4685c99dabffe5affac90bd99dbffd25801ae58d
+LAMBDA_IMAGE = camera-trap-lambda
+
+LAMBDA_WEIGHTS = build/lambda/model.safetensors
+
+# A file target, so the 330 MB copy happens once.
+$(LAMBDA_WEIGHTS):
+	mkdir -p build/lambda
+	python -c "from huggingface_hub import hf_hub_download; import shutil; \
+		shutil.copyfile(hf_hub_download('timm/vit_base_patch14_dinov2.lvd142m', \
+		'model.safetensors', revision='$(DINOV2_REVISION)'), '$(LAMBDA_WEIGHTS)')"
+
+lambda-model: $(LAMBDA_WEIGHTS) ## Stage the DINOv2 weights in build/lambda/ (330 MB; from the Hugging Face cache or a download, no account)
+
+# --provenance=false: Lambda rejects the multi-manifest image that Docker's
+# default build attestation produces.
+lambda-image: lambda-model ## Build the champion's Lambda container image (needs Docker)
+	docker build --network host --provenance=false -f infra/lambda/Dockerfile \
+		-t $(LAMBDA_IMAGE) .
+
+# AWS's emulator stands in for the Lambda service; a folder stands in for
+# S3. Read-only filesystem and a 512 MB /tmp as in Lambda. OMP_NUM_THREADS
+# matches the two CPUs allowed, which the container cannot see for itself.
+RIE_URL = https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/v1.38/aws-lambda-rie-x86_64
+EMULATOR = camera-trap-emulator
+
+build/aws-lambda-rie:
+	mkdir -p build
+	curl -sSL -o $@ $(RIE_URL)
+	chmod +x $@
+
+cloud-emulate: lambda-image build/aws-lambda-rie ## Run 96 crops through the container under the Lambda emulator and compare with the local predictions (needs Docker and the crop store)
+	mkdir -p build/emulator/bucket
+	docker run -d --rm --name $(EMULATOR) -p 9000:8080 \
+		--read-only --tmpfs /tmp:size=512m --memory 3008m --cpus 2 \
+		--user $$(id -u):$$(id -g) -e OMP_NUM_THREADS=2 -e LOCAL_ROOT=/local \
+		-v $(CURDIR)/build/aws-lambda-rie:/aws-lambda-rie:ro \
+		-v $(CURDIR)/build/emulator/bucket:/local/bucket \
+		-v $(CURDIR)/data/crops/orinoquia:/local/bucket/crops:ro \
+		--entrypoint /aws-lambda-rie $(LAMBDA_IMAGE) \
+		/opt/venv/bin/python -m awslambdaric cloud.handler.handler
+	sleep 2
+	PYTHONPATH=src python -m cloud.batch emulate; \
+		status=$$?; docker stop $(EMULATOR) > /dev/null; exit $$status
+
+# Terraform runs in a pinned image, so nothing needs installing.
+TF_IMAGE = hashicorp/terraform:1.16.6@sha256:bfffc1ded5fbf0a17beaaf22eb4793980abdb19d0761ff6a3a0efb2ab4d9b316
+DOCKER_RUN = docker run --rm --network host --user $$(id -u):$$(id -g) \
+	-e HOME=/tmp -v $(CURDIR):/repo -w /repo/infra/terraform
+TF = $(DOCKER_RUN) $(TF_IMAGE)
+
+tf-fmt: ## Format the Terraform (needs Docker)
+	$(TF) fmt -recursive
+
+tf-check: ## terraform fmt -check and validate, no account needed (needs Docker)
+	$(TF) fmt -check -recursive -diff
+	$(TF) init -backend=false -input=false
+	$(TF) validate
+
+# Everything below reads or changes your AWS account, so run it yourself:
+# it needs credentials in ~/.aws (set AWS_PROFILE) and
+# infra/terraform/terraform.tfvars. apply and destroy run interactively
+# (-it) so Terraform shows the plan and asks before changing anything.
+#
+# Order: tf-apply (budget alarm, bucket, registry) -> lambda-push ->
+# tf-apply FUNCTIONS=true -> cloud-upload -> cloud-sweep -> cloud-run
+# MEMORY=<the sweep's cheapest> -> tf-destroy -> cloud-leftovers.
+TF_AWS = $(DOCKER_RUN) -v $(HOME)/.aws:/tmp/.aws:ro -e AWS_PROFILE
+FUNCTIONS ?= false
+OUTPUT = python -c "import json, sys; print(json.load(open('build/terraform-outputs.json'))[sys.argv[1]]['value'])"
+
+tf-plan: ## terraform plan against your AWS account; FUNCTIONS=true includes the functions (credentials)
+	$(TF) init -input=false
+	$(TF_AWS) $(TF_IMAGE) plan -var deploy_functions=$(FUNCTIONS)
+
+tf-apply: ## Deploy; first without the functions, then FUNCTIONS=true after lambda-push (credentials)
+	$(TF) init -input=false
+	$(TF_AWS) -it $(TF_IMAGE) apply -var deploy_functions=$(FUNCTIONS)
+	$(MAKE) tf-output
+
+# The outputs include the account ID (in the registry URL): build/ is git-ignored.
+tf-output: ## Save terraform output -json to build/terraform-outputs.json
+	mkdir -p build
+	$(TF) output -json > build/terraform-outputs.json
+
+lambda-push: lambda-image ## Push the image to the stack's registry (credentials; after the first tf-apply)
+	aws ecr get-login-password --region $$($(OUTPUT) region) | \
+		docker login --username AWS --password-stdin $$($(OUTPUT) repository_url | cut -d/ -f1)
+	docker tag $(LAMBDA_IMAGE) $$($(OUTPUT) repository_url):$$($(OUTPUT) image_tag)
+	docker push $$($(OUTPUT) repository_url):$$($(OUTPUT) image_tag)
+
+cloud-upload: ## Upload the indexed crops (1.9 GB) to the stack's bucket; resumes (credentials)
+	PYTHONPATH=src python -m cloud.batch upload
+
+cloud-sweep: ## Score one fixed 512-crop sample at each memory size; writes results/cloud/ (credentials)
+	PYTHONPATH=src python -m cloud.batch sweep
+
+cloud-run: ## The measured run: every crop at MEMORY=<MB>; resumes; writes results/cloud/ (credentials)
+	PYTHONPATH=src python -m cloud.batch run --memory $(MEMORY)
+
+tf-destroy: ## Remove everything deployed, bucket contents and image included (credentials)
+	$(TF_AWS) -it $(TF_IMAGE) destroy -var deploy_functions=true
+
+cloud-leftovers: ## After tf-destroy: list anything of the project still in the account (credentials)
+	PYTHONPATH=src python -m cloud.batch leftovers
 
 test: ## Run the tests with coverage
 	PYTHONPATH=src python -m pytest -vv --cov=cameratrap --cov=cloud tests/

@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars (git-ignored) and fill in. Only alert_email is
+# required; the rest show the defaults.
+alert_email = "you@example.com"
+
+# region             = "eu-west-2"
+# monthly_budget_usd = 5
+# memory_sizes       = [1769, 3008]
+# expire_days        = 7
