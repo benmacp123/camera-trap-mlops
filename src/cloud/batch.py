@@ -535,26 +535,30 @@ def summarise(rows, prices):
     }
 
 
-def load_outputs(path=OUTPUTS):
+def load_outputs(path=OUTPUTS, need_functions=True):
     """Read what Terraform deployed.
 
     Args:
         path: The file ``make tf-output`` writes.
+        need_functions: Whether the caller invokes the functions. The
+            upload needs only the bucket, which exists before they do.
 
     Returns:
         Dict with ``bucket``, ``region`` and ``functions``, a mapping of
         memory size in MB (as a string) to function name.
 
     Raises:
-        SystemExit: If the file is missing or the functions are not
-            deployed yet.
+        SystemExit: If the file is missing, or the functions are needed
+            and not deployed yet.
     """
     if not path.exists():
         raise SystemExit(f"{path} not found: deploy first (make tf-apply)")
     raw = json.loads(path.read_text(encoding="utf-8"))
     outputs = {name: entry["value"] for name, entry in raw.items()}
-    if not outputs.get("functions"):
-        raise SystemExit("no functions deployed: run make tf-apply after the push")
+    if need_functions and not outputs.get("functions"):
+        raise SystemExit(
+            "no functions deployed: run make tf-apply FUNCTIONS=true after the push"
+        )
     return outputs
 
 
@@ -590,7 +594,7 @@ def main_upload(args):
     Returns:
         Process exit status.
     """
-    outputs = load_outputs()
+    outputs = load_outputs(need_functions=False)
     s3 = boto3.client("s3", region_name=outputs["region"])
     keys = crops.load_index()["path"].to_list()
     present = set()

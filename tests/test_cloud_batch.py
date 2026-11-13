@@ -250,6 +250,7 @@ def test_load_outputs_needs_deployed_functions(tmp_path):
     path.write_text(json.dumps({"bucket": {"value": "b"}, "functions": {"value": {}}}))
     with pytest.raises(SystemExit, match="no functions"):
         batch.load_outputs(path)
+    assert batch.load_outputs(path, need_functions=False)["bucket"] == "b"
     path.write_text(
         json.dumps({"bucket": {"value": "b"}, "functions": {"value": {"1769": "f"}}})
     )

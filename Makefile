@@ -205,12 +205,15 @@ TF_AWS = $(DOCKER_RUN) -v $(HOME)/.aws:/tmp/.aws:ro -e AWS_PROFILE
 FUNCTIONS ?= false
 OUTPUT = python -c "import json, sys; print(json.load(open('build/terraform-outputs.json'))[sys.argv[1]]['value'])"
 
-tf-plan: ## terraform plan against your AWS account; FUNCTIONS=true includes the functions (credentials)
+# The provider is downloaded once; later runs skip the registry, so a slow
+# network cannot fail a step that needs nothing from it.
+infra/terraform/.terraform:
 	$(TF) init -input=false
+
+tf-plan: infra/terraform/.terraform ## terraform plan against your AWS account; FUNCTIONS=true includes the functions (credentials)
 	$(TF_AWS) $(TF_IMAGE) plan -var deploy_functions=$(FUNCTIONS)
 
-tf-apply: ## Deploy; first without the functions, then FUNCTIONS=true after lambda-push (credentials)
-	$(TF) init -input=false
+tf-apply: infra/terraform/.terraform ## Deploy; first without the functions, then FUNCTIONS=true after lambda-push (credentials)
 	$(TF_AWS) -it $(TF_IMAGE) apply -var deploy_functions=$(FUNCTIONS)
 	$(MAKE) tf-output
 
@@ -234,8 +237,11 @@ cloud-sweep: ## Score one fixed 512-crop sample at each memory size; writes resu
 cloud-run: ## The measured run: every crop at MEMORY=<MB>; resumes; writes results/cloud/ (credentials)
 	PYTHONPATH=src python -m cloud.batch run --memory $(MEMORY)
 
+# deploy_functions=false: destroy removes everything in the state whatever
+# the variable says, and false stops Terraform looking up the pushed image,
+# which fails the destroy if the push never finished.
 tf-destroy: ## Remove everything deployed, bucket contents and image included (credentials)
-	$(TF_AWS) -it $(TF_IMAGE) destroy -var deploy_functions=true
+	$(TF_AWS) -it $(TF_IMAGE) destroy -var deploy_functions=false
 
 cloud-leftovers: ## After tf-destroy: list anything of the project still in the account (credentials)
 	PYTHONPATH=src python -m cloud.batch leftovers
