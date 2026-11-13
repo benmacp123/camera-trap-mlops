@@ -201,7 +201,7 @@ tf-check: ## terraform fmt -check and validate, no account needed (needs Docker)
 # Order: tf-apply (budget alarm, bucket, registry) -> lambda-push ->
 # tf-apply FUNCTIONS=true -> cloud-upload -> cloud-sweep -> cloud-run
 # MEMORY=<the sweep's cheapest> -> tf-destroy -> cloud-leftovers.
-TF_AWS = $(DOCKER_RUN) -v $(HOME)/.aws:/tmp/.aws:ro -e AWS_PROFILE
+TF_AWS = $(DOCKER_RUN) -v $(HOME)/.aws:/tmp/.aws -e AWS_PROFILE
 FUNCTIONS ?= false
 OUTPUT = python -c "import json, sys; print(json.load(open('build/terraform-outputs.json'))[sys.argv[1]]['value'])"
 
@@ -226,7 +226,12 @@ lambda-push: lambda-image ## Push the image to the stack's registry (credentials
 	aws ecr get-login-password --region $$($(OUTPUT) region) | \
 		docker login --username AWS --password-stdin $$($(OUTPUT) repository_url | cut -d/ -f1)
 	docker tag $(LAMBDA_IMAGE) $$($(OUTPUT) repository_url):$$($(OUTPUT) image_tag)
-	docker push $$($(OUTPUT) repository_url):$$($(OUTPUT) image_tag)
+	# Retry: finished layers are kept, so each attempt sends less. The ECR login
+	# token lasts 12 hours, far longer than the retries.
+	for attempt in 1 2 3 4 5 6; do \
+		docker push $$($(OUTPUT) repository_url):$$($(OUTPUT) image_tag) && exit 0; \
+		echo "push attempt $$attempt failed; retrying in 10 s"; sleep 10; \
+	done; exit 1
 
 cloud-upload: ## Upload the indexed crops (1.9 GB) to the stack's bucket; resumes (credentials)
 	PYTHONPATH=src python -m cloud.batch upload

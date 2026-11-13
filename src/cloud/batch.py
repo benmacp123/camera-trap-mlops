@@ -595,7 +595,17 @@ def main_upload(args):
         Process exit status.
     """
     outputs = load_outputs(need_functions=False)
-    s3 = boto3.client("s3", region_name=outputs["region"])
+    # Uploads are idempotent, so patient retries are safe here (unlike Lambda
+    # invokes, which are billed): ten attempts with backoff ride out a flaky link.
+    s3 = boto3.client(
+        "s3",
+        region_name=outputs["region"],
+        config=botocore.config.Config(
+            retries={"max_attempts": 10, "mode": "adaptive"},
+            connect_timeout=10,
+            read_timeout=30,
+        ),
+    )
     keys = crops.load_index()["path"].to_list()
     present = set()
     pages = s3.get_paginator("list_objects_v2").paginate(
@@ -613,18 +623,32 @@ def main_upload(args):
 
         Args:
             key: Crop path relative to the crop store.
-        """
-        s3.upload_file(
-            str(args.crop_dir / key),
-            outputs["bucket"],
-            CROP_PREFIX + key,
-            ExtraArgs={"ContentType": "image/jpeg"},
-        )
 
+        Returns:
+            True if it uploaded, False if it still failed after the client's
+            retries (a rerun picks it up, as the bucket is listed first).
+        """
+        try:
+            s3.upload_file(
+                str(args.crop_dir / key),
+                outputs["bucket"],
+                CROP_PREFIX + key,
+                ExtraArgs={"ContentType": "image/jpeg"},
+            )
+        except boto3.exceptions.S3UploadFailedError as error:
+            print(f"failed {key}: {error}", flush=True)
+            return False
+        return True
+
+    failed = 0
     with concurrent.futures.ThreadPoolExecutor(args.threads) as pool:
-        for done, _ in enumerate(pool.map(send, missing), start=1):
+        for done, ok in enumerate(pool.map(send, missing), start=1):
+            failed += not ok
             if done % 2000 == 0 or done == len(missing):
-                print(f"uploaded {done}/{len(missing)}", flush=True)
+                print(f"processed {done}/{len(missing)}", flush=True)
+    if failed:
+        print(f"{failed} crops failed; rerun make cloud-upload to send them")
+        return 1
     return 0
 
 
@@ -742,7 +766,7 @@ def main(argv=None):
 
     upload = commands.add_parser("upload", help=main_upload.__doc__.splitlines()[0])
     upload.add_argument("--crop-dir", type=Path, default=crops.CROP_DIR)
-    upload.add_argument("--threads", type=int, default=32)
+    upload.add_argument("--threads", type=int, default=16)
     upload.set_defaults(run=main_upload)
 
     sweep = commands.add_parser("sweep", help=main_sweep.__doc__.splitlines()[0])
