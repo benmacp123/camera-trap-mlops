@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control trust-report drift review track gate-calibrate hub-stage hub-upload fetch-embeddings prices lambda-model lambda-image cloud-emulate tf-fmt tf-check tf-plan tf-apply tf-output lambda-push cloud-upload cloud-sweep cloud-run tf-destroy cloud-leftovers test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control trust-report drift review track gate-calibrate hub-stage hub-upload fetch-embeddings prices lambda-model lambda-image cloud-emulate tf-fmt tf-check tf-plan tf-apply tf-output lambda-push cloud-upload cloud-sweep cloud-run tf-destroy cloud-leftovers cloud-report test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -250,6 +250,9 @@ tf-destroy: ## Remove everything deployed, bucket contents and image included (c
 
 cloud-leftovers: ## After tf-destroy: list anything of the project still in the account (credentials)
 	PYTHONPATH=src python -m cloud.batch leftovers
+
+cloud-report: ## Cost report from the committed run files; writes results/cloud/summary.json and figures/ (no account)
+	PYTHONPATH=src python -m cloud.report
 
 test: ## Run the tests with coverage
 	PYTHONPATH=src python -m pytest -vv --cov=cameratrap --cov=cloud tests/

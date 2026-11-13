@@ -1,0 +1,9 @@
+{
+  "region": "eu-west-2",
+  "created_utc": "2026-11-13T10:55:40Z",
+  "destroyed_utc": "2026-11-13T17:42:15Z",
+  "days": 0.2823,
+  "crop_bytes": 1933153339,
+  "image_bytes": 694637468,
+  "teardown": "terraform destroy: 11 resources destroyed; cloud-leftovers: 0 tagged resources found in eu-west-2"
+}

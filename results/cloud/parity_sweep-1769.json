@@ -1,0 +1,10 @@
+{
+  "crops": 512,
+  "sequences": 505,
+  "max_abs_logit_difference": 8.286321335848612e-05,
+  "crop_predictions_differing": 0,
+  "sequence_predictions_differing": 0,
+  "holdout_sequences_compared": 2,
+  "holdout_sequences_differing": 0,
+  "passed": true
+}
