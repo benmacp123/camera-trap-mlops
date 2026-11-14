@@ -1,7 +1,7 @@
 # Every target runs from committed files and public downloads; none needs
 # an account. `make help` lists them.
 
-.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control trust-report drift review track gate-calibrate hub-stage hub-upload fetch-embeddings prices lambda-model lambda-image cloud-emulate tf-fmt tf-check tf-plan tf-apply tf-output lambda-push cloud-upload cloud-sweep cloud-run tf-destroy cloud-leftovers cloud-report test lint format format-check
+.PHONY: help install install-models lock manifest subset fetch spike-models spike crop-index fetch-crops crops crop-sizes detector-report embed embed-check speciesnet-crops baselines challengers select-challenger freeze holdout-check holdout cnn-control control trust-report drift review track gate-calibrate hub-stage hub-upload head-stage head-upload head-check fetch-embeddings prices lambda-model lambda-image cloud-emulate tf-fmt tf-check tf-plan tf-apply tf-output lambda-push cloud-upload cloud-sweep cloud-run tf-destroy cloud-leftovers cloud-report test lint format format-check
 
 help: ## List the targets and what each does
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | \
@@ -125,6 +125,19 @@ REPO_ID ?= benmacp123/orinoquia-crop-embeddings
 
 hub-upload: ## Owner only: upload data/hub_stage/ to REPO_ID (needs `hf auth login`)
 	PYTHONPATH=src python -m cameratrap.embed.hub upload --repo-id $(REPO_ID)
+
+# The promoted head and its model card. The card is written from the
+# committed results, so staging it needs no cache, model or account.
+HEAD_REPO_ID ?= benmacp123/orinoquia-dinov2-probe
+
+head-stage: ## Write the promoted head and its model card into build/head_stage/
+	PYTHONPATH=src python -m cameratrap.arms.head_hub stage --repo-id $(HEAD_REPO_ID)
+
+head-upload: ## Owner only: upload the head and card to HEAD_REPO_ID (needs `hf auth login`)
+	PYTHONPATH=src python -m cameratrap.arms.head_hub upload --repo-id $(HEAD_REPO_ID)
+
+head-check: ## Download the published head and compare it with the committed one; no account
+	PYTHONPATH=src python -m cameratrap.arms.head_hub check
 
 # Phase 8, the AWS batch route. Everything down to tf-check runs without an
 # account. Docker commands use --network host: the bridge network here has
