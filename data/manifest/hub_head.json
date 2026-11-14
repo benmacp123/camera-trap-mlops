@@ -1,0 +1,8 @@
+{
+  "repo_id": "benmacp123/orinoquia-dinov2-probe",
+  "repo_type": "model",
+  "revision": "496b949423a637109481a97677985d01d9618d95",
+  "files": {
+    "probe_head.npz": "02615a9d5cfc1db26a181e951d0389a41696f2a0fcc62ae995b79f0aa866c8fc"
+  }
+}

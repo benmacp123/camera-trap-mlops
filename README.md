@@ -208,9 +208,12 @@ make control drift review trust-report cloud-report track
 
 `make holdout` refuses to overwrite the one-shot result; to reproduce it,
 run `PYTHONPATH=src python -m cameratrap.report.holdout --out-dir <folder>`
-and compare. These steps take about an hour on a laptop.
+and compare. These steps take a little over an hour on a laptop.
 
-@@CLONE_RESULT@@
+This was checked on 2026-11-14 from a fresh clone with no Hugging Face
+token: every step above ran, and every committed table and figure under
+`results/` and `figures/` was rewritten byte for byte, as were the five
+hold-out files.
 
 Rebuilding from the images (20 GB, and about a day of CPU for the
 embeddings) is covered in [Reproducing every step](docs/reproducing.md).
